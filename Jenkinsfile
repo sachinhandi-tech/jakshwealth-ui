@@ -2,6 +2,7 @@
 
 def props
 
+/** Run closure with AWS keys from Jenkins credential store (ID: jakshwealth-aws). */
 def jakshAws(Closure body) {
     withCredentials([[
         $class: 'AmazonWebServicesCredentialsBinding',

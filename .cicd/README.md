@@ -1,45 +1,32 @@
 # JakshWealth UI — CI/CD
 
-Pipeline deploys the **jakshwealth-ui** Angular app to S3 + CloudFront provisioned by **jakshwealth-infra**.
+Personal Jenkins pipeline: build Angular → S3 sync → CloudFront invalidation.
 
-## AWS credentials
+## Jenkins job setup
 
-Personal account: configure `aws configure --profile jakshwealth` on the build agent.
-See `../jakshwealth-infra/docs/AWS_PERSONAL_SETUP.md` and `.cicd/build_props/*.properties`.
-
-```bash
-./scripts/verify-aws.sh
-```
+| Setting | Value |
+|---------|--------|
+| Pipeline script | `Jenkinsfile` (repo root) or `.cicd/Jenkinsfile` |
+| Agent | any (Node.js + AWS CLI on Jenkins server) |
+| GitHub credentials | Required for private repo (PAT on `sachinhandi-tech`) |
+| AWS | Jenkins credential `jakshwealth-aws` — see `../jakshwealth-infra/docs/JENKINS_SETUP.md` |
 
 ## Branch → environment
 
 | Branch | `deploy_env` |
 |--------|--------------|
-| `main` / `master` | `prod` |
+| `main` | `prod` |
 | `test` | `test` |
-| other (e.g. `dev`) | `dev` |
+| other | `dev` |
 
-## S3 / CloudFront (from jakshwealth-infra)
+## Prerequisites on Jenkins server
 
-Buckets: `jakshwealth-ui-{env}` (see `s3-cloudfront-ssa/`)
+- Node.js 20+ and `npm`
+- AWS CLI v2 with profile `jakshwealth`
+- Platform infra applied first (`jakshwealth-infra` pipeline)
 
-Apply platform infra first:
+## Deploy order
 
-```bash
-cd jakshwealth-infra/s3-cloudfront-ssa/module
-export AWS_PROFILE=jakshwealth
-terraform init -backend-config=config/dev-backend.tfvars
-terraform apply -var deploy_env=dev -var-file=s3_config_vars/s3.dev.tfvars
-```
-
-Then this UI pipeline syncs `dist/browser/` and invalidates CloudFront.
-
-## API URL
-
-Set `environment.*.ts` `url` to the JakshWealth API Gateway domain, e.g.:
-
-`https://jw-api-g.jakshwealth-dev.example.com/jw-api/`
-
-Set matching `FRONTEND_URL` in `{env}/jakshwealth/config` for CORS and Okta redirects.
-
-CloudFront origin ID pattern: `S3-jakshwealth-ui-{env}`
+1. **jakshwealth-infra** — S3 + CloudFront + API Gateway shell
+2. **jakshwealth-api** — Lambdas + integrations
+3. **jakshwealth-ui** — this pipeline
