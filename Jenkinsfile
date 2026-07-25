@@ -54,31 +54,22 @@ pipeline {
         stage('Set environment') {
             steps {
                 script {
-                    if (env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master') {
-                        props = readProperties file: "${WORKSPACE}/.cicd/build_props/prod-build.properties"
-                    } else if (env.BRANCH_NAME == 'test') {
-                        props = readProperties file: "${WORKSPACE}/.cicd/build_props/test-build.properties"
-                    } else {
-                        props = readProperties file: "${WORKSPACE}/.cicd/build_props/dev-build.properties"
-                    }
+                    props = readProperties file: "${WORKSPACE}/.cicd/build_props/build.properties"
                     env.AWS_CREDENTIALS_ID = (props.aws_credentials_id ?: '').trim()
                     env.AWS_PROFILE = props.aws_profile ?: 'jakshwealth'
                     env.AWS_REGION = props.aws_region ?: 'us-east-1'
-                    env.DEPLOY_ENV = props.deploy_env
+                    env.DEPLOY_ENV = props.deploy_env ?: 'dev'
                 }
             }
         }
 
         stage('Build Angular app') {
             steps {
-                script {
-                    def buildTarget = "build${env.DEPLOY_ENV.capitalize()}"
-                    sh """
-                        export NPM_CONFIG_CACHE="${WORKSPACE}/.npm"
-                        npm ci
-                        npm run ${buildTarget}
-                    """
-                }
+                sh """
+                    export NPM_CONFIG_CACHE="${WORKSPACE}/.npm"
+                    npm ci
+                    npm run buildDev
+                """
             }
         }
 
