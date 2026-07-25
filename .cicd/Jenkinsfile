@@ -4,13 +4,7 @@ def props
 
 pipeline {
     agent {
-        kubernetes {
-            cloud "da-hpp-ccd-openshift-devops1"
-            label "ccd-web-pod"
-            customWorkspace "/home/jenkins/agent/workspace"
-            defaultContainer "cloudkit"
-            yamlFile ".cicd/build-agent.yaml"
-        }
+        any
     }
     options {
         buildDiscarder(logRotator(numToKeepStr: '10'))
