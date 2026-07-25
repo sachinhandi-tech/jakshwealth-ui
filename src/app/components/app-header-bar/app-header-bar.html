@@ -31,32 +31,5 @@
         </a>
       }
     </nav>
-
-    <div class="jw-nav__actions">
-      @if (isLoggedIn()) {
-        <div class="jw-nav__account">
-          <button
-            type="button"
-            class="jw-nav__account-btn"
-            aria-label="Account menu"
-            [attr.aria-expanded]="accountMenuOpen()"
-            (click)="toggleAccountMenu()">
-            <span class="jw-nav__avatar" aria-hidden="true">{{ userInitials() }}</span>
-          </button>
-
-          @if (accountMenuOpen()) {
-            <div class="jw-nav__dropdown" role="menu" aria-label="Account actions">
-              <button type="button" class="jw-nav__dropdown-item" role="menuitem" (click)="signOut()">
-                Sign out
-              </button>
-            </div>
-          }
-        </div>
-      } @else {
-        <button type="button" class="jw-btn jw-btn--primary jw-nav__login" (click)="login()">
-          Sign in
-        </button>
-      }
-    </div>
   </div>
 </header>

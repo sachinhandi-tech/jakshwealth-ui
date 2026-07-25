@@ -13,7 +13,6 @@ import {
 } from '@angular/router';
 
 import { routes } from './app.routes';
-import { authInterceptor } from './interceptors/auth.interceptor';
 import { cacheControlInterceptor } from './interceptors/cache-control.interceptor';
 import { errorInterceptor } from './interceptors/error.interceptor';
 import { urlInterceptor } from './interceptors/url.interceptor';
@@ -30,12 +29,7 @@ export const appConfig: ApplicationConfig = {
       withRouterConfig({ paramsInheritanceStrategy: 'always' }),
     ),
     provideHttpClient(
-      withInterceptors([
-        cacheControlInterceptor,
-        urlInterceptor,
-        authInterceptor,
-        errorInterceptor,
-      ]),
+      withInterceptors([cacheControlInterceptor, urlInterceptor, errorInterceptor]),
     ),
   ],
 };

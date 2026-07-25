@@ -8,10 +8,5 @@ export interface Environment {
   production: boolean;
   url: string;
   altUrl?: string;
-  unAuthenticatedAPI: string[];
-  fssoUrl: string;
-  fssoRedirectRoute: string;
-  clientId: string;
-  scope: string;
   specifiedAPI?: SpecifiedAPI[];
 }

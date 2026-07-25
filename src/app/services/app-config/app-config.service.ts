@@ -8,8 +8,6 @@ export interface AppConfig {
   environment: string;
   features: Record<string, boolean>;
   enableAiChat?: boolean;
-  bypassOktaAuth: boolean;
-  clientId: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -37,7 +35,7 @@ export class AppConfigService {
     return this.config$;
   }
 
-  /** Reload app-config from the API (for example after admin feature changes). */
+  /** Reload app-config from the API (for example after feature flag changes). */
   refreshConfig(): Observable<AppConfig> {
     this.config$ = this.createConfigRequest();
     return this.config$;

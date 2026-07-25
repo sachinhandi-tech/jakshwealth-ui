@@ -31,9 +31,7 @@ describe('AppConfigService', () => {
       appName: 'JakshWealth',
       version: '1.0.0',
       environment: 'dev',
-      features: {},
-      bypassOktaAuth: false,
-      clientId: '0oaDevClientId',
+      features: { stockScan: true },
     });
 
     const config = await configPromise;
@@ -41,9 +39,7 @@ describe('AppConfigService', () => {
       appName: 'JakshWealth',
       version: '1.0.0',
       environment: 'dev',
-      features: {},
-      bypassOktaAuth: false,
-      clientId: '0oaDevClientId',
+      features: { stockScan: true },
     });
     expect(service.snapshot()).toEqual(config);
   });
@@ -55,13 +51,11 @@ describe('AppConfigService', () => {
       version: '1.0.0',
       environment: 'dev',
       features: {},
-      bypassOktaAuth: true,
-      clientId: '0oaDevClientId',
     });
     await firstLoad;
 
     const config = await firstValueFrom(service.getConfig());
     httpMock.expectNone('app-config');
-    expect(config.bypassOktaAuth).toBe(true);
+    expect(config.environment).toBe('dev');
   });
 });

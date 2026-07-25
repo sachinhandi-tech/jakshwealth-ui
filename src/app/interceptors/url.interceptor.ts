@@ -25,7 +25,7 @@ export const urlInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req.clone({ url: specified.url + req.url }));
   }
 
-  if (req.url === 'app-config' || req.url.startsWith('token-auth')) {
+  if (req.url === 'app-config') {
     return next(req.clone({ url: env.url + req.url }));
   }
 
