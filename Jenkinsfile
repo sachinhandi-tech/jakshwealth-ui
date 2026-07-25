@@ -59,6 +59,7 @@ pipeline {
                     env.AWS_PROFILE = props.aws_profile ?: 'jakshwealth'
                     env.AWS_REGION = props.aws_region ?: 'ap-south-2'
                     env.DEPLOY_ENV = props.deploy_env ?: 'dev'
+                    env.BUCKET_REGION_SUFFIX = props.bucket_region_suffix ?: 'aps2'
                 }
             }
         }
@@ -79,7 +80,7 @@ pipeline {
                     jakshAws {
                         sh '''
                             aws sts get-caller-identity
-                            aws s3 sync dist/browser/. "s3://${S3_BUCKET_PREFIX}-${DEPLOY_ENV}/" --delete
+                            aws s3 sync dist/browser/. "s3://${S3_BUCKET_PREFIX}-${DEPLOY_ENV}-${BUCKET_REGION_SUFFIX}/" --delete
                         '''
                     }
                 }
@@ -92,7 +93,7 @@ pipeline {
                     jakshAws {
                         sh '''
                             CF_ID=$(aws cloudfront list-distributions \
-                              --query "DistributionList.Items[*].{id:Id,origin:Origins.Items[0].Id}[?origin=='S3-${S3_BUCKET_PREFIX}-${DEPLOY_ENV}'].id" \
+                              --query "DistributionList.Items[*].{id:Id,origin:Origins.Items[0].Id}[?origin=='S3-${S3_BUCKET_PREFIX}-${DEPLOY_ENV}-${BUCKET_REGION_SUFFIX}'].id" \
                               --output text)
                             if [ -n "${CF_ID}" ] && [ "${CF_ID}" != "None" ]; then
                               aws cloudfront create-invalidation --distribution-id "${CF_ID}" --paths "/*"
