@@ -1,27 +1,24 @@
 ---
-description: HPP Insights Hub — app stack, auth, and routing conventions
+description: JakshWealth app context for Cursor agents
 alwaysApply: true
 ---
 
-# HPP Insights Hub (self-service-analytics-ui)
+# JakshWealth UI
 
-Angular **21** standalone app with **NGUI Canvas** and Okta auth. Read **`AGENTS.md`** at the repo root first.
+Angular **21** personal stock-analysis app. Read **`AGENTS.md`** at the repo root first.
 
 ## Constraints
 
-- **Do not** scaffold a new app shell — `AppHeaderBar` + `ngui-header` already exist.
-- **Do not** re-run NGUI install/setup — library and global styles are configured.
+- **Do not** scaffold a new app shell — `AppHeaderBar` already exists.
 - **Do not** invent auth flows — use `AuthService`, `UserService`, `AuthorizationService`, `authGuard`.
-- **Do not** invent `ngui-*` APIs — read `node_modules/@cigna/cigna_dae_ngui_library/lib/interfaces/<name>.ts`.
-- Full component list: **`AGENTS.ngui.md`** (not this rule).
 
 ## Patterns to copy
 
-- New feature module → `features/proof-points/` or `features/utilization/`
+- New feature → `features/stock-analysis/`
 - Lazy routing → `app.routes.ts` + `layout/feature-layout.ts`
-- Protected route → `canActivate: [authGuard]`; admin-only → `data: { authorizerRoles: SSA_ADMIN_ROLES }`
-- NGUI page → `ngui-typography` + `ngui-card` / `ngui-tabs` like existing feature homes
+- Protected route → `canActivate: [authGuard]`
+- Page layout → `components/about/`, `features/stock-analysis/stock-analysis-home.html`
 
-## Commands / skills
+## Skills
 
-- New feature page → skill **`ssa-feature-page`** (`.cursor/skills/ssa-feature-page/SKILL.md`)
+- New feature page → **`jw-feature-page`** (`.cursor/skills/jw-feature-page/SKILL.md`)

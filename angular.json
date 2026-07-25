@@ -31,8 +31,7 @@
               }
             ],
             "styles": [
-              "src/styles.css",
-              "node_modules/@cigna/cigna_dae_ngui_library/assets/styles.min.css"
+              "src/styles.css"
             ]
           },
           "configurations": {

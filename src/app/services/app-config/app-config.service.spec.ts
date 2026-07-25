@@ -28,7 +28,7 @@ describe('AppConfigService', () => {
     const req = httpMock.expectOne('app-config');
     expect(req.request.method).toBe('GET');
     req.flush({
-      appName: 'SSA',
+      appName: 'JakshWealth',
       version: '1.0.0',
       environment: 'dev',
       features: {},
@@ -38,7 +38,7 @@ describe('AppConfigService', () => {
 
     const config = await configPromise;
     expect(config).toEqual({
-      appName: 'SSA',
+      appName: 'JakshWealth',
       version: '1.0.0',
       environment: 'dev',
       features: {},
@@ -51,7 +51,7 @@ describe('AppConfigService', () => {
   it('reuses cached config on subsequent calls', async () => {
     const firstLoad = firstValueFrom(service.getConfig());
     httpMock.expectOne('app-config').flush({
-      appName: 'SSA',
+      appName: 'JakshWealth',
       version: '1.0.0',
       environment: 'dev',
       features: {},

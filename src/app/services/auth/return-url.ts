@@ -1,20 +1,14 @@
 import { Routes } from '@angular/router';
 
 import { routes } from '../../app.routes';
-import { ADMIN_ROUTES } from '../../features/admin/admin.routes';
-import { AI_CHAT_ROUTES } from '../../features/ai-chat/ai-chat.routes';
-import { PROOF_POINTS_ROUTES } from '../../features/proof-points/proof-points.routes';
-import { UTILIZATION_ROUTES } from '../../features/utilization/utilization.routes';
+import { STOCK_ANALYSIS_ROUTES } from '../../features/stock-analysis/stock-analysis.routes';
 
 const DEFAULT_RETURN_URL = '/home';
 
 const AUTH_FLOW_PATHS = new Set(['/authorize', '/logout', '/unauthorised', '/about', '/']);
 
 const LAZY_CHILDREN: Record<string, Routes> = {
-  utilization: UTILIZATION_ROUTES,
-  'proof-points': PROOF_POINTS_ROUTES,
-  admin: ADMIN_ROUTES,
-  'ai-chat': AI_CHAT_ROUTES,
+  'stock-analysis': STOCK_ANALYSIS_ROUTES,
 };
 
 const REGISTERED_RETURN_PATHS = collectReturnPaths(routes);

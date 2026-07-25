@@ -1,5 +1,5 @@
 export const OKTA_STATE_KEY = 'okta_oauth_state';
-export const RETURN_URL_KEY = 'ssa_return_url';
+export const RETURN_URL_KEY = 'jw_return_url';
 export const AUTHORIZE_ROUTE = '/authorize';
 
 export const NON_RETURN_PATHS = new Set([

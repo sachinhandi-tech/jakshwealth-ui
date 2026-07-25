@@ -9,9 +9,9 @@ export const environment: Environment = {
   production: false,
   url: '/jw-api/',
   unAuthenticatedAPI: ['token-auth', 'app-config', 's3.amazonaws.com'],
-  fssoUrl: 'https://cigna.oktapreview.com/oauth2/default/v1/authorize',
+  fssoUrl: 'https://REPLACE_WITH_OKTA_DOMAIN/oauth2/default/v1/authorize',
   fssoRedirectRoute: '/authorize',
-  clientId: '0oa115h0hl9OPMnFl0h8',
+  clientId: 'REPLACE_WITH_OKTA_CLIENT_ID',
   scope: 'apigroups email profile openid groups',
 };
 

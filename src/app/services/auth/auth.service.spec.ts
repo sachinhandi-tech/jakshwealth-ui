@@ -52,8 +52,8 @@ describe('AuthService', () => {
   });
 
   it('stores and resolves valid return urls', () => {
-    auth.rememberReturnUrl('/proof-points/ccd?tab=1');
-    expect(auth.consumeReturnUrl()).toBe('/proof-points/ccd');
+    auth.rememberReturnUrl('/stock-analysis?tab=1');
+    expect(auth.consumeReturnUrl()).toBe('/stock-analysis');
   });
 
   it('ignores auth-flow paths when remembering return urls', () => {
@@ -66,7 +66,7 @@ describe('AuthService', () => {
 
     const loginPromise = firstValueFrom(auth.startLoginFromAppConfig('/home', env));
     httpMock.expectOne('app-config').flush({
-      appName: 'SSA',
+      appName: 'JakshWealth',
       version: '1',
       environment: 'dev',
       features: {},
@@ -142,14 +142,14 @@ describe('AuthService', () => {
     const assign = vi.fn();
     vi.stubGlobal('location', {
       ...window.location,
-      origin: 'https://dev-ssa.da-hpp-dev.aws.cignacloud.com',
+      origin: 'https://app.jakshwealth.example',
       assign,
     });
 
     try {
       auth.startLogin(env, true);
       expect(assign).toHaveBeenCalledWith(
-        '/jw-api/token-auth/?bypass=true&redirect=true&redirect_uri=https%3A%2F%2Fdev-ssa.da-hpp-dev.aws.cignacloud.com',
+        '/jw-api/token-auth/?bypass=true&redirect=true&redirect_uri=https%3A%2F%2Fapp.jakshwealth.example',
       );
     } finally {
       vi.unstubAllGlobals();

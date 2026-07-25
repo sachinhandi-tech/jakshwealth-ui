@@ -4,7 +4,7 @@ import { isRegisteredReturnPath, resolveReturnUrl } from './return-url';
 
 describe('resolveReturnUrl', () => {
   it('returns stored path when it is a registered route', () => {
-    expect(resolveReturnUrl('/proof-points/ccd')).toBe('/proof-points/ccd');
+    expect(resolveReturnUrl('/stock-analysis')).toBe('/stock-analysis');
     expect(resolveReturnUrl('/home')).toBe('/home');
   });
 
@@ -18,9 +18,8 @@ describe('resolveReturnUrl', () => {
 
 describe('isRegisteredReturnPath', () => {
   it('recognises feature routes', () => {
-    expect(isRegisteredReturnPath('/utilization')).toBe(true);
-    expect(isRegisteredReturnPath('/admin')).toBe(true);
-    expect(isRegisteredReturnPath('/proof-points/tier-1')).toBe(true);
+    expect(isRegisteredReturnPath('/stock-analysis')).toBe(true);
+    expect(isRegisteredReturnPath('/home')).toBe(true);
   });
 
   it('rejects unregistered paths', () => {

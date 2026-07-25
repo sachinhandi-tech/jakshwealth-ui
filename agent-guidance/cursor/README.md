@@ -1,11 +1,8 @@
-# Cursor agent guidance
+# Cursor (JakshWealth UI)
 
-| File | Purpose |
+| Path | Purpose |
 |------|---------|
-| **`../AGENTS.md`** | App architecture, auth, routing (start here) |
-| **`AGENTS.ngui.md`** (repo root) | Full NGUI component catalog from npm |
-| **`rules/`** | Always-on and glob rules for this app |
-| **`skills/ssa-feature-page/`** | Workflow for new feature pages |
-| **`commands/build-feature-page.md`** | Slash command → skill above |
+| **`rules/app-context.mdc`** | App constraints and patterns |
+| **`skills/jw-feature-page/`** | Workflow for new feature pages |
 
-Editable source: **`agent-guidance/cursor/`** — synced on `npm install`.
+Source of truth: `agent-guidance/` (synced on `npm install`).

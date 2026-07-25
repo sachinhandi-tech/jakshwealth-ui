@@ -12,13 +12,9 @@ import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
 
 import { AuthorizationService } from '../../services/authorization/authorization.service';
-import { AppConfigService } from '../../services/app-config/app-config.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { EnvironmentService } from '../../services/environment/environment.service';
 import { UserService } from '../../services/user/user.service';
-import { JW_ADMIN_ROLES } from '../../../environments/environment';
-
-const ADMIN_NAV_REQUIRES_ADMIN_ROLE = false;
 
 interface NavItem {
   label: string;
@@ -35,7 +31,6 @@ interface NavItem {
 export class AppHeaderBar {
   private readonly userService = inject(UserService);
   private readonly authorization = inject(AuthorizationService);
-  private readonly appConfig = inject(AppConfigService);
   private readonly authService = inject(AuthService);
   private readonly environment = inject(EnvironmentService).getEnvironment();
   private readonly router = inject(Router);
@@ -57,8 +52,6 @@ export class AppHeaderBar {
     const path = this.currentPath();
     if (path?.startsWith('/home')) return 'Dashboard';
     if (path?.startsWith('/stock-analysis')) return 'Scanner';
-    if (path?.startsWith('/ai-chat')) return 'AI Chat';
-    if (path?.startsWith('/admin')) return 'Settings';
     return 'About';
   });
 
@@ -71,41 +64,18 @@ export class AppHeaderBar {
     return name.slice(0, 2).toUpperCase();
   });
 
-  readonly showAdminNav = computed(() => {
-    if (!this.isLoggedIn()) return false;
-    if (ADMIN_NAV_REQUIRES_ADMIN_ROLE) {
-      const roles = this.authorization.authorizerRoles();
-      return JW_ADMIN_ROLES.some(role => roles.includes(role));
-    }
-    return true;
-  });
-
-  readonly showAiChatNav = computed(() => {
-    if (!this.isLoggedIn() || this.authorization.accessGranted() !== true) return false;
-    return this.appConfig.snapshot()?.features?.['aiChat'] === true;
-  });
-
   readonly navItems = computed<NavItem[]>(() => {
     const items: NavItem[] = [{ label: 'About', route: '/about' }];
     if (this.authorization.accessGranted() === true) {
       items.unshift({ label: 'Dashboard', route: '/home' });
       items.push({ label: 'Scanner', route: '/stock-analysis' });
     }
-    if (this.showAiChatNav()) {
-      items.push({ label: 'AI Chat', route: '/ai-chat' });
-    }
-    if (this.showAdminNav()) {
-      items.push({ label: 'Settings', route: '/admin' });
-    }
     return items;
   });
 
   constructor() {
-    if (this.isLoggedIn()) {
-      this.appConfig.getConfig().subscribe();
-      if (this.authorization.accessGranted() === null) {
-        this.authorization.probeAccess().subscribe();
-      }
+    if (this.isLoggedIn() && this.authorization.accessGranted() === null) {
+      this.authorization.probeAccess().subscribe();
     }
   }
 
