@@ -2,27 +2,36 @@
 
 def props
 
-/** Run closure with AWS keys from Jenkins credential store (ID: jakshwealth-aws). */
 def jakshAws(Closure body) {
-    withCredentials([[
-        $class: 'AmazonWebServicesCredentialsBinding',
-        credentialsId: 'jakshwealth-aws',
-        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-    ]]) {
-        withEnv([
-            "AWS_DEFAULT_REGION=${env.AWS_REGION}",
-            "AWS_REGION=${env.AWS_REGION}",
-            'AWS_PROFILE=jakshwealth'
-        ]) {
-            sh '''
-                mkdir -p "${HOME}/.aws"
-                cat > "${HOME}/.aws/credentials" <<EOF
-[jakshwealth]
-aws_access_key_id=${AWS_ACCESS_KEY_ID}
-aws_secret_access_key=${AWS_SECRET_ACCESS_KEY}
+    def credId = env.AWS_CREDENTIALS_ID?.trim()
+    def profile = env.AWS_PROFILE ?: 'jakshwealth'
+    def awsEnv = [
+        "AWS_DEFAULT_REGION=${env.AWS_REGION}",
+        "AWS_REGION=${env.AWS_REGION}",
+        "AWS_PROFILE=${profile}"
+    ]
+
+    if (credId) {
+        withCredentials([[
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: credId,
+            accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+            secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+        ]]) {
+            withEnv(awsEnv) {
+                sh """
+                    mkdir -p "\${HOME}/.aws"
+                    cat > "\${HOME}/.aws/credentials" <<EOF
+[${profile}]
+aws_access_key_id=\${AWS_ACCESS_KEY_ID}
+aws_secret_access_key=\${AWS_SECRET_ACCESS_KEY}
 EOF
-            '''
+                """
+                body()
+            }
+        }
+    } else {
+        withEnv(awsEnv) {
             body()
         }
     }
@@ -52,7 +61,8 @@ pipeline {
                     } else {
                         props = readProperties file: "${WORKSPACE}/.cicd/build_props/dev-build.properties"
                     }
-                    env.AWS_CREDENTIALS_ID = props.aws_credentials_id ?: 'jakshwealth-aws'
+                    env.AWS_CREDENTIALS_ID = (props.aws_credentials_id ?: '').trim()
+                    env.AWS_PROFILE = props.aws_profile ?: 'jakshwealth'
                     env.AWS_REGION = props.aws_region ?: 'us-east-1'
                     env.DEPLOY_ENV = props.deploy_env
                 }
