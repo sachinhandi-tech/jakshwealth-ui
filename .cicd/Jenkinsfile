@@ -54,9 +54,8 @@ pipeline {
         stage('Set environment') {
             steps {
                 script {
-                    if (env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'master') {
-                        props = readProperties file: "${WORKSPACE}/.cicd/build_props/prod-build.properties"
-                    } else if (env.BRANCH_NAME == 'test') {
+                    // Personal project: single dev environment (main deploys to dev bucket).
+                    if (env.BRANCH_NAME == 'test') {
                         props = readProperties file: "${WORKSPACE}/.cicd/build_props/test-build.properties"
                     } else {
                         props = readProperties file: "${WORKSPACE}/.cicd/build_props/dev-build.properties"
@@ -88,7 +87,8 @@ pipeline {
         stage('Build Angular app') {
             steps {
                 script {
-                    def buildTarget = "build${env.DEPLOY_ENV.capitalize()}"
+                    // Optimized production bundle; env file still dev (single personal environment).
+                    def buildTarget = env.BRANCH_NAME == 'test' ? 'buildTest' : 'buildProd'
                     sh """
                         export NPM_CONFIG_CACHE="${WORKSPACE}/.npm"
                         npm ci
