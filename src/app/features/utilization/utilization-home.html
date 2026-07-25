@@ -1,0 +1,12 @@
+<ngui-typography type="h2" class="utilization-home__title">CCD and Tiered Utilization</ngui-typography>
+
+<ngui-tabs
+  variant="page-level"
+  [items]="tabItems"
+  [activeIndex]="activeIndex()"
+  (activeIndexChange)="onTabChange($event)"
+  ariaLabel="Utilization dashboard views" />
+
+<div class="utilization-home__content">
+  <router-outlet />
+</div>

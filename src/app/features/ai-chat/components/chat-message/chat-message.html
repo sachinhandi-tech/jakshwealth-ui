@@ -1,0 +1,15 @@
+<article
+  class="chat-message"
+  [class.chat-message--user]="message().role === 'user'"
+  [class.chat-message--assistant]="message().role === 'assistant'"
+  [class.chat-message--error]="message().error">
+  <ngui-typography type="ui-small" class="chat-message__role">
+    {{ message().role === 'user' ? 'You' : 'Assistant' }}
+  </ngui-typography>
+
+  @if (message().content) {
+    <ngui-typography type="paragraph" class="chat-message__text">
+      {{ message().content }}
+    </ngui-typography>
+  }
+</article>

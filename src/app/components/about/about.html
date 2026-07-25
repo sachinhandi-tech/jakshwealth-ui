@@ -1,0 +1,28 @@
+<section class="about jw-page">
+  <header class="about__hero">
+    <span class="about__eyebrow">About JakshWealth</span>
+    <h1 class="about__title">
+      Your gateway to <span class="jw-gradient-text">smarter</span> NSE investing
+    </h1>
+    <p class="about__lead">
+      JakshWealth combines technical structure analysis with momentum screening to surface
+      high-probability breakout candidates from the Indian equity market.
+    </p>
+  </header>
+
+  <div class="about__grid">
+    @for (feature of features; track feature.title) {
+      <div class="about__card jw-glass-card">
+        <span class="about__icon" aria-hidden="true">{{ feature.icon }}</span>
+        <h2>{{ feature.title }}</h2>
+        <p>{{ feature.description }}</p>
+      </div>
+    }
+  </div>
+
+  <section class="about__cta jw-glass-card">
+    <h2>Ready to scan the market?</h2>
+    <p>Sign in to access the breakout scanner, ranked recommendations, and weekly analysis tools.</p>
+    <a routerLink="/stock-analysis" class="jw-btn jw-btn--primary">Get started</a>
+  </section>
+</section>

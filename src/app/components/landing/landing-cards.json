@@ -1,0 +1,28 @@
+[
+  {
+    "icon": "radar",
+    "title": "HH-HL Breakout Scanner",
+    "description": "Scan NSE equities for higher-high / higher-low structural breakouts with SMA40, volume expansion, and RSI cooling filters.",
+    "actionLabel": "Launch scanner",
+    "route": "/stock-analysis",
+    "accent": "cyan",
+    "badge": "Popular"
+  },
+  {
+    "icon": "trending_up",
+    "title": "Momentum Picks",
+    "description": "Ranked candidates scored on pattern strength, proximity to breakout, and technical confluence — your weekly watchlist.",
+    "actionLabel": "View rankings",
+    "route": "/stock-analysis",
+    "accent": "purple",
+    "badge": "New"
+  },
+  {
+    "icon": "insights",
+    "title": "Market Structure",
+    "description": "Understand weekly price structure, support/resistance levels, and volume-backed moves across the NSE universe.",
+    "actionLabel": "Explore",
+    "route": "/stock-analysis",
+    "accent": "pink"
+  }
+]

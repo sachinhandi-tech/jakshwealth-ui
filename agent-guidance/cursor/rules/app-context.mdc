@@ -1,0 +1,27 @@
+---
+description: HPP Insights Hub — app stack, auth, and routing conventions
+alwaysApply: true
+---
+
+# HPP Insights Hub (self-service-analytics-ui)
+
+Angular **21** standalone app with **NGUI Canvas** and Okta auth. Read **`AGENTS.md`** at the repo root first.
+
+## Constraints
+
+- **Do not** scaffold a new app shell — `AppHeaderBar` + `ngui-header` already exist.
+- **Do not** re-run NGUI install/setup — library and global styles are configured.
+- **Do not** invent auth flows — use `AuthService`, `UserService`, `AuthorizationService`, `authGuard`.
+- **Do not** invent `ngui-*` APIs — read `node_modules/@cigna/cigna_dae_ngui_library/lib/interfaces/<name>.ts`.
+- Full component list: **`AGENTS.ngui.md`** (not this rule).
+
+## Patterns to copy
+
+- New feature module → `features/proof-points/` or `features/utilization/`
+- Lazy routing → `app.routes.ts` + `layout/feature-layout.ts`
+- Protected route → `canActivate: [authGuard]`; admin-only → `data: { authorizerRoles: SSA_ADMIN_ROLES }`
+- NGUI page → `ngui-typography` + `ngui-card` / `ngui-tabs` like existing feature homes
+
+## Commands / skills
+
+- New feature page → skill **`ssa-feature-page`** (`.cursor/skills/ssa-feature-page/SKILL.md`)

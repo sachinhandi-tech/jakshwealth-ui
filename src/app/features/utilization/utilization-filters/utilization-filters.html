@@ -1,0 +1,66 @@
+<aside
+  class="utilization-filters__panel"
+  [class.utilization-filters__panel--narrow]="isCollapsed()"
+  [class.utilization-filters__panel--expanded]="isCollapsed() && visible()"
+  aria-label="Utilization filters">
+  @if (isCollapsed()) {
+    <button
+      type="button"
+      class="utilization-filters__strip-btn"
+      [attr.aria-expanded]="visible()"
+      aria-label="Toggle filters"
+      (click)="togglePanel()">
+      <span class="utilization-filters__strip-label">Filters</span>
+    </button>
+  }
+
+  <div class="utilization-filters__body">
+    @if (isCollapsed()) {
+      <header class="utilization-filters__header">
+        <span class="utilization-filters__title">Filters</span>
+        <button
+          type="button"
+          class="utilization-filters__close"
+          aria-label="Close filters"
+          (click)="closePanel()">
+          ×
+        </button>
+      </header>
+    } @else {
+      <header class="utilization-filters__header utilization-filters__header--desktop">
+        <span class="utilization-filters__title">Filters</span>
+      </header>
+    }
+
+    <div class="utilization-filters">
+      <div class="utilization-filters__timeline">
+        <ngui-typography type="ui-small" class="utilization-filters__section-label">
+          Timeline
+        </ngui-typography>
+
+        <ngui-chips
+          type="single-select"
+          size="md"
+          [selected]="timeline()"
+          (selectedChange)="onTimelineChange($event)">
+          <ngui-chip label="Qr" value="qr" />
+          <ngui-chip label="MoM" value="mom" />
+        </ngui-chips>
+      </div>
+
+      @for (filter of filters(); track filter.key) {
+        <ngui-dropdown
+          class="utilization-filters__dropdown"
+          [label]="filter.label"
+          [options]="filter.options"
+          [disabled]="isDisabled(filter.key)"
+          [filter]="filter.options.length > 8"
+          [showClear]="filter.key !== 'ccdYear'"
+          placeholder="Select..."
+          width="100%"
+          [ngModel]="filterValues()[filter.key]"
+          (ngModelChange)="onFilterChange(filter.key, $event)" />
+      }
+    </div>
+  </div>
+</aside>

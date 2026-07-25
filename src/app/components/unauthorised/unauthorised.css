@@ -1,0 +1,37 @@
+.unauthorised {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-height: 50vh;
+}
+
+.unauthorised__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: 28rem;
+  padding: 2.5rem 2rem;
+  text-align: center;
+}
+
+.unauthorised__icon {
+  font-size: 2.5rem;
+}
+
+.unauthorised__card h1 {
+  font-size: 1.5rem;
+  color: var(--jw-red);
+}
+
+.unauthorised__card p {
+  color: var(--jw-text-muted);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.unauthorised__hint {
+  font-size: 0.8125rem !important;
+  color: var(--jw-text-dim) !important;
+}

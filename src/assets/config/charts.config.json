@@ -1,0 +1,137 @@
+{
+  "defaults": {
+    "bar": "bar_default",
+    "doughnut": "doughnut"
+  },
+  "schemes": {
+    "bar": [
+      {
+        "id": "bar_default",
+        "legend_colors": [
+          "var(--dataviz-qualitative-100)",
+          "var(--dataviz-qualitative-200)",
+          "var(--dataviz-qualitative-300)",
+          "var(--dataviz-qualitative-400)"
+        ],
+        "chartOptions": {
+          "responsive": true,
+          "maintainAspectRatio": false,
+          "barThickness": 28,
+          "borderWidth": 0,
+          "borderRadius": 4,
+          "plugins": {
+            "legend": {
+              "display": true,
+              "position": "bottom",
+              "align": "start"
+            }
+          },
+          "scales": {
+            "x": { "grid": { "display": false } },
+            "y": { "beginAtZero": true }
+          }
+        }
+      }
+    ],
+    "doughnut": [
+      {
+        "id": "doughnut",
+        "legend_colors": ["#0d0da1", "#3879db", "#002f32"],
+        "dataSetDefaults": {
+          "borderColor": "#ffffff",
+          "borderAlign": "inner",
+          "borderWidth": 0,
+          "hoverOffset": 0,
+          "clip": false
+        },
+        "chartOptions": {
+          "responsive": true,
+          "maintainAspectRatio": false,
+          "clip": false,
+          "cutout": "75%",
+          "rotation": -90,
+          "spacing": 2,
+          "interaction": {
+            "mode": "nearest",
+            "intersect": true
+          },
+          "layout": {
+            "padding": {
+              "top": 6,
+              "left": 4,
+              "right": 4,
+              "bottom": 4
+            }
+          },
+          "elements": {
+            "arc": {
+              "borderWidth": 0,
+              "borderAlign": "inner"
+            }
+          },
+          "plugins": {
+            "tooltip": {
+              "titleFont": {
+                "family": "Nunito Sans, sans-serif",
+                "size": 12,
+                "weight": "600",
+                "lineHeight": 1.5
+              },
+              "bodyFont": {
+                "family": "Nunito Sans, sans-serif",
+                "size": 14,
+                "weight": "400",
+                "lineHeight": 1.43
+              },
+              "padding": 8,
+              "bodySpacing": 4,
+              "displayColors": false
+            },
+            "legend": {
+              "display": true,
+              "position": "bottom",
+              "align": "center",
+              "labels": {
+                "boxWidth": 10,
+                "boxHeight": 10,
+                "padding": 12,
+                "usePointStyle": true,
+                "pointStyle": "circle",
+                "font": {
+                  "size": 12,
+                  "weight": 400
+                }
+              }
+            },
+            "proofPointDoughnutCenter": {
+              "lineGap": 2,
+              "valueFont": "700 18px/24px \"Nunito Sans\", sans-serif",
+              "labelFont": "500 14px/18px \"Nunito Sans\", sans-serif",
+              "valueColor": "#2b2826",
+              "labelColor": "#6b6966"
+            }
+          }
+        },
+        "presentation": {
+          "width": "100%",
+          "minWidth": "22rem",
+          "height": "18.5rem"
+        }
+      }
+    ]
+  },
+  "chartBindings": [
+    {
+      "match": { "suffix": "-primary", "chartType": "bar" },
+      "schemeId": "bar_default",
+      "titleTemplate": "{designationLabel} {viewLabel} ({timelineLabel})",
+      "seriesLabelTemplates": ["{metric}"]
+    },
+    {
+      "match": { "suffix": "-comparison", "chartType": "bar" },
+      "schemeId": "bar_default",
+      "titleTemplate": "{designationLabel} {viewLabel} comparison",
+      "seriesLabelTemplates": ["{metric}", "{comparison}"]
+    }
+  ]
+}

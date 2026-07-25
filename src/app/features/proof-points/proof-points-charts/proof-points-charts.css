@@ -1,0 +1,46 @@
+:host {
+  display: block;
+  container-type: inline-size;
+  container-name: proof-points-charts;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.proof-points-charts {
+  --proof-points-chart-aspect-ratio: 16 / 10;
+  --proof-points-chart-card-min-width: 480px;
+  --proof-points-chart-card-max-width: 660px;
+  --proof-points-chart-gap: 0.5rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--proof-points-chart-gap);
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+@container proof-points-charts (min-width: calc(480px + 480px + 0.5rem)) {
+  .proof-points-charts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .proof-points-charts > app-proof-point-chart-card {
+    min-width: min(var(--proof-points-chart-card-min-width), 100%);
+  }
+}
+
+.proof-points-charts > app-proof-point-chart-card {
+  width: 100%;
+  max-width: min(var(--proof-points-chart-card-max-width), 100%);
+  justify-self: center;
+}
+
+.proof-points-charts__status {
+  grid-column: 1 / -1;
+  color: var(--text-secondary, var(--neutral-600));
+}
+
+.proof-points-charts__status--error {
+  color: var(--text-error, var(--semantic-error-main, #b00020));
+}

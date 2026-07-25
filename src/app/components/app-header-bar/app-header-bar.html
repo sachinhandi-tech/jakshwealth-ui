@@ -1,0 +1,62 @@
+<header class="jw-nav">
+  <div class="jw-nav__inner">
+    <a class="jw-nav__brand" routerLink="/home" aria-label="JakshWealth home">
+      <span class="jw-nav__logo" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="url(#navLogoBg)"/>
+          <path d="M6 22 L12 14 L17 18 L26 8" stroke="url(#navLogoLine)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="26" cy="8" r="2.5" fill="#00d4ff"/>
+          <defs>
+            <linearGradient id="navLogoBg" x1="0" y1="0" x2="32" y2="32">
+              <stop stop-color="#1e293b"/>
+              <stop offset="1" stop-color="#0f172a"/>
+            </linearGradient>
+            <linearGradient id="navLogoLine" x1="6" y1="22" x2="26" y2="8">
+              <stop stop-color="#00d4ff"/>
+              <stop offset="1" stop-color="#ec4899"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </span>
+      <span class="jw-nav__name">Jaksh<span class="jw-nav__name-accent">Wealth</span></span>
+    </a>
+
+    <nav class="jw-nav__links" aria-label="Primary navigation">
+      @for (item of navItems(); track item.route) {
+        <a
+          class="jw-nav__link"
+          [class.jw-nav__link--active]="selectedNav() === item.label"
+          [routerLink]="item.route">
+          {{ item.label }}
+        </a>
+      }
+    </nav>
+
+    <div class="jw-nav__actions">
+      @if (isLoggedIn()) {
+        <div class="jw-nav__account">
+          <button
+            type="button"
+            class="jw-nav__account-btn"
+            aria-label="Account menu"
+            [attr.aria-expanded]="accountMenuOpen()"
+            (click)="toggleAccountMenu()">
+            <span class="jw-nav__avatar" aria-hidden="true">{{ userInitials() }}</span>
+          </button>
+
+          @if (accountMenuOpen()) {
+            <div class="jw-nav__dropdown" role="menu" aria-label="Account actions">
+              <button type="button" class="jw-nav__dropdown-item" role="menuitem" (click)="signOut()">
+                Sign out
+              </button>
+            </div>
+          }
+        </div>
+      } @else {
+        <button type="button" class="jw-btn jw-btn--primary jw-nav__login" (click)="login()">
+          Sign in
+        </button>
+      }
+    </div>
+  </div>
+</header>

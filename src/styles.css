@@ -1,0 +1,215 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  /* Surfaces */
+  --jw-bg-deep: #070b14;
+  --jw-bg-base: #0a0e1a;
+  --jw-bg-elevated: #111827;
+  --jw-bg-glass: rgba(17, 24, 39, 0.72);
+  --jw-bg-glass-hover: rgba(24, 32, 52, 0.85);
+
+  /* Text */
+  --jw-text: #f1f5f9;
+  --jw-text-muted: #94a3b8;
+  --jw-text-dim: #64748b;
+
+  /* Accents */
+  --jw-cyan: #00d4ff;
+  --jw-purple: #a855f7;
+  --jw-pink: #ec4899;
+  --jw-lime: #84cc16;
+  --jw-amber: #f59e0b;
+  --jw-green: #10b981;
+  --jw-red: #ef4444;
+
+  /* Gradients */
+  --jw-gradient-brand: linear-gradient(135deg, var(--jw-cyan) 0%, var(--jw-purple) 50%, var(--jw-pink) 100%);
+  --jw-gradient-mesh:
+    radial-gradient(ellipse 80% 60% at 10% 0%, rgba(0, 212, 255, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 50% at 90% 10%, rgba(168, 85, 247, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 40% at 50% 100%, rgba(236, 72, 153, 0.08) 0%, transparent 50%);
+
+  /* Layout */
+  --content-max-width: 80rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'Space Grotesk', var(--font-sans);
+  --font-mono: 'IBM Plex Mono', 'SF Mono', ui-monospace, monospace;
+
+  /* Effects */
+  --jw-glass-border: 1px solid rgba(255, 255, 255, 0.08);
+  --jw-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --jw-glow-cyan: 0 0 24px rgba(0, 212, 255, 0.25);
+  --jw-glow-purple: 0 0 24px rgba(168, 85, 247, 0.25);
+
+  /* Legacy aliases (used by some components) */
+  --color-text: var(--jw-text);
+  --color-text-muted: var(--jw-text-muted);
+  --color-surface: var(--jw-bg-elevated);
+  --color-surface-muted: var(--jw-bg-base);
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-accent: var(--jw-cyan);
+  --color-accent-hover: #33ddff;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--jw-text);
+  background: var(--jw-bg-deep);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  line-height: 1.2;
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--jw-cyan);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: var(--color-accent-hover);
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+/* Utility classes */
+.jw-gradient-text {
+  background: var(--jw-gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.jw-glass-card {
+  background: var(--jw-bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: var(--jw-glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--jw-glass-shadow);
+}
+
+.jw-page {
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.jw-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.jw-btn:active {
+  transform: scale(0.98);
+}
+
+.jw-btn--primary {
+  background: var(--jw-gradient-brand);
+  color: #fff;
+  box-shadow: var(--jw-glow-cyan);
+}
+
+.jw-btn--primary:hover {
+  box-shadow: 0 0 32px rgba(0, 212, 255, 0.4);
+}
+
+.jw-btn--primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.jw-btn--ghost {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--jw-text);
+  border: var(--jw-glass-border);
+}
+
+.jw-btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.jw-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.jw-badge--buy {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--jw-green);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.jw-badge--watch {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--jw-amber);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.jw-badge--neutral {
+  background: rgba(148, 163, 184, 0.15);
+  color: var(--jw-text-muted);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.page-card {
+  background: var(--jw-bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: var(--jw-glass-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+}

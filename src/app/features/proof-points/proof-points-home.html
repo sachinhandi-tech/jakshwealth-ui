@@ -1,0 +1,14 @@
+<!-- <section class="proof-points page-card"> -->
+  <ngui-typography type="h2" class="proof-points-home__title">CCD and Tier 1 Proof Points</ngui-typography>
+
+  <ngui-tabs
+    variant="page-level"
+    [items]="tabItems"
+    [activeIndex]="activeIndex()"
+    (activeIndexChange)="onTabChange($event)"
+    ariaLabel="Proof Points views" />
+
+  <div class="proof-points__content">
+    <router-outlet />
+  </div>
+<!-- </section> -->

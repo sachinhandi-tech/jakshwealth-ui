@@ -1,0 +1,164 @@
+<div class="scanner jw-page">
+  <header class="scanner__header">
+    <div>
+      <span class="scanner__eyebrow">Breakout Scanner</span>
+      <h1 class="scanner__title">NSE <span class="jw-gradient-text">HH-HL</span> Analysis</h1>
+      <p class="scanner__subtitle">
+        Structural breakout detection for Indian equities — higher high / higher low patterns,
+        SMA40 confluence, volume expansion, and RSI cooling filters.
+      </p>
+      <p class="scanner__universe">{{ universeLabel() }}</p>
+    </div>
+  </header>
+
+  @if (hasScanned()) {
+    <section class="scanner__kpis" aria-label="Scan summary">
+      <div class="scanner__kpi jw-glass-card">
+        <span class="scanner__kpi-value">{{ scannedCount() }}</span>
+        <span class="scanner__kpi-label">Symbols scanned</span>
+      </div>
+      <div class="scanner__kpi jw-glass-card scanner__kpi--signal">
+        <span class="scanner__kpi-value">{{ finalSignalCount() }}</span>
+        <span class="scanner__kpi-label">Final signals</span>
+      </div>
+      <div class="scanner__kpi jw-glass-card scanner__kpi--ranked">
+        <span class="scanner__kpi-value">{{ rankedCount() }}</span>
+        <span class="scanner__kpi-label">Ranked picks</span>
+      </div>
+      <div class="scanner__kpi jw-glass-card scanner__kpi--threshold">
+        <span class="scanner__kpi-value">≥{{ minScore }}</span>
+        <span class="scanner__kpi-label">Score threshold</span>
+      </div>
+    </section>
+  }
+
+  <div class="scanner__grid">
+    <section class="scanner__panel jw-glass-card">
+      <h2 class="scanner__panel-title">
+        <span aria-hidden="true">⚙️</span> Scan configuration
+      </h2>
+
+      <div class="scanner__form">
+        <label class="scanner__field">
+          <span class="scanner__label">Scan mode</span>
+          <select class="scanner__input" [(ngModel)]="useUniverse">
+            <option [ngValue]="true">NSE universe (limited)</option>
+            <option [ngValue]="false">Custom symbols</option>
+          </select>
+        </label>
+
+        @if (useUniverse) {
+          <label class="scanner__field">
+            <span class="scanner__label">Symbol limit</span>
+            <input class="scanner__input" type="number" min="1" max="500" [(ngModel)]="symbolLimit" />
+          </label>
+        } @else {
+          <label class="scanner__field scanner__field--wide">
+            <span class="scanner__label">Symbols (comma or space separated)</span>
+            <input
+              class="scanner__input"
+              type="text"
+              placeholder="RELIANCE, TCS, INFY, HDFCBANK"
+              [(ngModel)]="symbolsInput" />
+          </label>
+        }
+
+        <label class="scanner__field">
+          <span class="scanner__label">Minimum score</span>
+          <input class="scanner__input" type="number" min="0" max="100" [(ngModel)]="minScore" />
+        </label>
+
+        <label class="scanner__toggle">
+          <input type="checkbox" [(ngModel)]="strictRsi30" />
+          <span class="scanner__toggle-track"></span>
+          <span class="scanner__toggle-label">Strict RSI &lt; 30 <small>(off = cooling below 35)</small></span>
+        </label>
+
+        <div class="scanner__actions">
+          <button
+            type="button"
+            class="jw-btn jw-btn--primary scanner__run-btn"
+            [disabled]="loading()"
+            (click)="runScan()">
+            @if (loading()) {
+              <span class="scanner__spinner" aria-hidden="true"></span>
+              Scanning market…
+            } @else {
+              🚀 Run breakout scan
+            }
+          </button>
+        </div>
+
+        @if (error()) {
+          <div class="scanner__error" role="alert">{{ error() }}</div>
+        }
+      </div>
+    </section>
+
+    <section class="scanner__panel jw-glass-card scanner__results">
+      <div class="scanner__results-header">
+        <h2 class="scanner__panel-title">
+          <span aria-hidden="true">📊</span> Recommendations
+        </h2>
+        @if (results().length) {
+          <span class="scanner__results-count">{{ results().length }} candidates</span>
+        }
+      </div>
+
+      @if (!results().length && !loading()) {
+        <div class="scanner__empty">
+          <span class="scanner__empty-icon" aria-hidden="true">🔍</span>
+          <p>Run a scan to discover ranked breakout candidates.</p>
+          <p class="scanner__empty-hint">Results appear here with scores, signals, and technical levels.</p>
+        </div>
+      }
+
+      @if (results().length) {
+        <div class="scanner__table-wrap">
+          <table class="scanner__table">
+            <thead>
+              <tr>
+                <th>Symbol</th>
+                <th>Signal</th>
+                <th>Score</th>
+                <th>Close</th>
+                <th>HH Level</th>
+                <th>Breakout</th>
+                <th>RSI</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of results(); track row.Symbol) {
+                <tr [class.scanner__row--signal]="row.Final_Signal">
+                  <td class="scanner__symbol">{{ row.Symbol }}</td>
+                  <td>
+                    <span class="jw-badge" [class]="signalClass(row)">{{ signalLabel(row) }}</span>
+                  </td>
+                  <td>
+                    <div class="scanner__score">
+                      <div class="scanner__score-bar">
+                        <div
+                          class="scanner__score-fill"
+                          [class]="scoreClass(row.Score)"
+                          [style.width]="scoreWidth(row.Score)"></div>
+                      </div>
+                      <span class="scanner__score-value">{{ row.Score ?? '—' }}</span>
+                    </div>
+                  </td>
+                  <td class="scanner__num">₹{{ formatPrice(row.Close) }}</td>
+                  <td class="scanner__num">{{ formatPrice(row.Current_HH) }}</td>
+                  <td class="scanner__num">{{ formatPct(row.Distance_To_Breakout_pct) }}</td>
+                  <td class="scanner__num" [class.scanner__rsi--cool]="row.RSI14 != null && row.RSI14 < 35">
+                    {{ row.RSI14 ?? '—' }}
+                  </td>
+                  <td class="scanner__status">{{ row.Scan_Status }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  </div>
+</div>

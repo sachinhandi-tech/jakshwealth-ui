@@ -1,0 +1,24 @@
+<div
+  class="proof-points-charts"
+  [style.--proof-points-chart-aspect-ratio]="chartAspectRatio"
+  [style.--proof-points-chart-card-min-width]="chartCardMinWidth"
+  [style.--proof-points-chart-card-max-width]="chartCardMaxWidth"
+  aria-label="Proof point charts">
+  @if (loading()) {
+    <ngui-typography type="ui-small" class="proof-points-charts__status">
+      Loading charts…
+    </ngui-typography>
+  } @else if (error()) {
+    <ngui-typography type="ui-small" class="proof-points-charts__status proof-points-charts__status--error">
+      {{ error() }}
+    </ngui-typography>
+  } @else if (charts().length === 0) {
+    <ngui-typography type="ui-small" class="proof-points-charts__status">
+      No charts available for this view.
+    </ngui-typography>
+  } @else {
+    @for (chart of charts(); track chart.chartId) {
+      <app-proof-point-chart-card [chart]="chart" [activeViewLabel]="activeViewLabel()" />
+    }
+  }
+</div>

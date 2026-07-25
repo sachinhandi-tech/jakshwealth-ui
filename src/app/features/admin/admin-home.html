@@ -1,0 +1,58 @@
+<section class="admin-home page-card">
+  <ngui-typography type="h2">Admin</ngui-typography>
+  <ngui-typography type="paragraph">
+    Manage application features available to authenticated users.
+  </ngui-typography>
+
+  @if (loading()) {
+    <ngui-typography type="paragraph">Loading admin settings…</ngui-typography>
+  } @else {
+    <section class="admin-home__panel">
+      <ngui-typography type="h3">AI chat</ngui-typography>
+
+      @if (!canManageAiChat()) {
+        <ngui-typography type="paragraph" class="admin-home__locked">
+          AI chat is disabled for this environment. A platform administrator must set
+          <code>ENABLE_AI_CHAT=true</code> in the SSA AWS secret before this toggle can be used.
+          For local development, add <code>ENABLE_AI_CHAT</code> to <code>config.local.json</code>.
+        </ngui-typography>
+      } @else {
+        <ngui-typography type="paragraph">
+          When enabled, users see an AI Chat tab in the header and can ask for text, table, or chart
+          responses.
+        </ngui-typography>
+      }
+
+      <label class="admin-home__toggle" [class.admin-home__toggle--disabled]="!canManageAiChat()">
+        <input
+          type="checkbox"
+          [checked]="aiChatEnabled()"
+          [disabled]="!canManageAiChat() || saving()"
+          (change)="aiChatEnabled.set($any($event.target).checked)" />
+        Enable AI chat for users
+      </label>
+
+      <div class="admin-home__actions">
+        <ngui-button
+          [label]="saving() ? 'Saving…' : 'Save changes'"
+          alert="primary"
+          size="md"
+          type="button"
+          [disabled]="!canManageAiChat() || saving()"
+          (buttonClick)="saveAiChatSetting()" />
+      </div>
+
+      @if (statusMessage()) {
+        <ngui-typography type="paragraph" class="admin-home__status">
+          {{ statusMessage() }}
+        </ngui-typography>
+      }
+
+      @if (errorMessage()) {
+        <ngui-typography type="paragraph" class="admin-home__error">
+          {{ errorMessage() }}
+        </ngui-typography>
+      }
+    </section>
+  }
+</section>

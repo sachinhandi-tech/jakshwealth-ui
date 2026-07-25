@@ -1,0 +1,95 @@
+:host {
+  display: block;
+  width: 100%;
+  min-width: var(--navigation-card-min-width, 320px);
+}
+
+.nav-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.625rem;
+  width: 100%;
+  min-height: 220px;
+  padding: 1.5rem;
+  text-align: left;
+  background: var(--jw-bg-glass);
+  backdrop-filter: blur(16px);
+  border: var(--jw-glass-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  overflow: hidden;
+}
+
+.nav-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  opacity: 0.8;
+}
+
+.nav-card--cyan::before { background: linear-gradient(90deg, var(--jw-cyan), transparent); }
+.nav-card--purple::before { background: linear-gradient(90deg, var(--jw-purple), transparent); }
+.nav-card--pink::before { background: linear-gradient(90deg, var(--jw-pink), transparent); }
+.nav-card--lime::before { background: linear-gradient(90deg, var(--jw-lime), transparent); }
+.nav-card--amber::before { background: linear-gradient(90deg, var(--jw-amber), transparent); }
+
+.nav-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: var(--jw-glass-shadow);
+}
+
+.nav-card--cyan:hover { box-shadow: var(--jw-glow-cyan); }
+.nav-card--purple:hover { box-shadow: var(--jw-glow-purple); }
+
+.nav-card__badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--jw-text-muted);
+}
+
+.nav-card__icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.nav-card__title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--jw-text);
+}
+
+.nav-card__desc {
+  flex: 1;
+  font-size: 0.875rem;
+  color: var(--jw-text-muted);
+  line-height: 1.5;
+}
+
+.nav-card__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: auto;
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--jw-cyan);
+}
+
+.nav-card--purple .nav-card__action { color: var(--jw-purple); }
+.nav-card--pink .nav-card__action { color: var(--jw-pink); }

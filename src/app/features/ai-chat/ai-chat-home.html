@@ -1,0 +1,73 @@
+<section class="ai-chat page-card feature-home">
+  <header class="ai-chat__header">
+    <ngui-typography type="h2">AI Analytics Chat</ngui-typography>
+    <ngui-typography type="paragraph">
+      Ask for text answers, tables, or charts. The API plans a DSL query, verifies it, and returns a
+      render-ready response.
+    </ngui-typography>
+  </header>
+
+  @if (featureError()) {
+    <ngui-typography type="paragraph" class="ai-chat__error">
+      {{ featureError() }}
+    </ngui-typography>
+  }
+
+  <div class="ai-chat__messages" aria-live="polite">
+    @if (messages().length === 0 && featureReady()) {
+      <ngui-typography type="paragraph" class="ai-chat__empty">
+        Try prompts like “hello”, “list recent claims”, or “chart claims by region”. Press Enter to
+        send; Shift+Enter for a new line.
+      </ngui-typography>
+    }
+
+    @for (message of messages(); track message.id) {
+      <div class="ai-chat__message-block">
+        <app-chat-message [message]="message" />
+
+        @if (message.table) {
+          <app-chat-table
+            [title]="message.table.title"
+            [columns]="message.table.columns"
+            [rows]="message.table.rows" />
+        }
+
+        @if (message.chart) {
+          <app-chat-chart [chart]="message.chart" />
+        }
+      </div>
+    }
+  </div>
+
+  <form class="ai-chat__composer" (submit)="$event.preventDefault(); sendPrompt()">
+    <label class="ai-chat__label" for="ai-chat-prompt">Your question</label>
+    <textarea
+      id="ai-chat-prompt"
+      class="ai-chat__input"
+      rows="3"
+      [value]="prompt()"
+      [disabled]="loading() || !featureReady()"
+      (input)="onPromptInput($event)"
+      (keydown)="onPromptKeydown($event)"
+      placeholder="Ask for a chart, table, or explanation"></textarea>
+
+    <div class="ai-chat__actions">
+      <label class="ai-chat__live-data">
+        <input
+          type="checkbox"
+          [checked]="useLiveData()"
+          [disabled]="!featureReady()"
+          (change)="onLiveDataChange($event)" />
+        Use live Databricks data when configured
+      </label>
+
+      <ngui-button
+        [label]="sendLabel()"
+        alert="primary"
+        size="md"
+        type="button"
+        [disabled]="!canSend()"
+        (buttonClick)="sendPrompt()" />
+    </div>
+  </form>
+</section>

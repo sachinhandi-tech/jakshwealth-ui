@@ -1,0 +1,71 @@
+<div class="landing jw-page">
+  <section class="landing__hero">
+    <div class="landing__hero-content">
+      <span class="landing__eyebrow">NSE · Indian Equities · Weekly Analysis</span>
+      <h1 class="landing__title">
+        Smart stock picks,<br />
+        <span class="jw-gradient-text">powered by structure.</span>
+      </h1>
+      <p class="landing__subtitle">
+        JakshWealth scans the market for high-probability breakouts — combining HH-HL patterns,
+        momentum filters, and RSI signals into actionable recommendations.
+      </p>
+      <div class="landing__hero-actions">
+        <a routerLink="/stock-analysis" class="jw-btn jw-btn--primary">Run breakout scan</a>
+        <a routerLink="/about" class="jw-btn jw-btn--ghost">How it works</a>
+      </div>
+    </div>
+
+    <div class="landing__hero-visual" aria-hidden="true">
+      <div class="landing__orb landing__orb--cyan"></div>
+      <div class="landing__orb landing__orb--purple"></div>
+      <div class="landing__chart-preview">
+        <svg viewBox="0 0 200 100" class="landing__chart-svg">
+          <defs>
+            <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="rgba(0,212,255,0.3)"/>
+              <stop offset="100%" stop-color="rgba(0,212,255,0)"/>
+            </linearGradient>
+            <linearGradient id="chartLine" x1="0" y1="0" x2="1" y2="0">
+              <stop stop-color="#00d4ff"/>
+              <stop offset="1" stop-color="#a855f7"/>
+            </linearGradient>
+          </defs>
+          <path d="M0,80 Q30,75 50,60 T100,45 T150,30 T200,15" fill="none" stroke="url(#chartLine)" stroke-width="2.5"/>
+          <path d="M0,80 Q30,75 50,60 T100,45 T150,30 T200,15 L200,100 L0,100 Z" fill="url(#chartFill)"/>
+        </svg>
+        <div class="landing__chart-stat">
+          <span class="landing__chart-stat-value">+12.4%</span>
+          <span class="landing__chart-stat-label">Avg breakout gain</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="landing__stats" aria-label="Platform highlights">
+    @for (stat of stats; track stat.label) {
+      <div class="landing__stat jw-glass-card">
+        <span class="landing__stat-value" [style.color]="stat.color">{{ stat.value }}</span>
+        <span class="landing__stat-label">{{ stat.label }}</span>
+      </div>
+    }
+  </section>
+
+  <section class="landing__features">
+    <div class="landing__features-header">
+      <h2>Your analysis toolkit</h2>
+      <p>Everything you need to find and rank NSE breakout candidates.</p>
+    </div>
+
+    <div
+      class="landing__cards"
+      [style.--landing-card-min-width]="cardMinWidth"
+      [style.--landing-card-gap]="cardGap"
+      [style.--navigation-card-aspect-ratio]="cardAspectRatio"
+      [style.--navigation-card-min-width]="cardMinWidth">
+      @for (card of cards; track card.route + card.title) {
+        <app-navigation-card [card]="card" (cardSelect)="onCardSelect($event)" />
+      }
+    </div>
+  </section>
+</div>
