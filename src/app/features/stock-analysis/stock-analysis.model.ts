@@ -35,6 +35,17 @@ export interface StockScanResponse {
   rankedCandidateCount: number;
 }
 
+export type ScanJobStatus = 'pending' | 'running' | 'complete' | 'failed';
+
+export interface StockScanJobResponse extends Partial<StockScanResponse> {
+  jobId: string;
+  status: ScanJobStatus;
+  progress: { total: number; completed: number };
+  error?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface StockUniverseResponse {
   segment: UniverseSegment;
   label: string;
@@ -44,11 +55,8 @@ export interface StockUniverseResponse {
 }
 
 export const DEFAULT_MIN_SCORE = 80;
-export const DEFAULT_SYMBOL_LIMIT = 30;
-/** API Gateway sync timeout is ~29s — keep scans under this size. */
-export const API_GATEWAY_SYMBOL_LIMIT_MAX = 120;
-/** Recommended max for custom watchlists (parallel scan budget). */
-export const CUSTOM_SYMBOL_LIMIT_MAX = 30;
+/** Scans run asynchronously — full index universes are supported. */
+export const ASYNC_SCAN_MAX_WORKERS = 12;
 
 export const UNIVERSE_TABS: readonly { id: UniverseSegment; label: string }[] = [
   { id: 'midcap', label: 'Nifty Midcap 150' },

@@ -2,11 +2,10 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 
 import {
-  API_GATEWAY_SYMBOL_LIMIT_MAX,
-  CUSTOM_SYMBOL_LIMIT_MAX,
+  ASYNC_SCAN_MAX_WORKERS,
   DEFAULT_MIN_SCORE,
-  DEFAULT_SYMBOL_LIMIT,
   parseCustomSymbols,
+  ScanJobStatus,
   StockScanRow,
   UNIVERSE_TABS,
   UniverseSegment,
@@ -28,18 +27,18 @@ export class StockAnalysisHome {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly universeLabel = signal('Loading universe…');
+  readonly universeSymbolCount = signal(0);
   readonly results = signal<StockScanRow[]>([]);
   readonly scannedCount = signal(0);
   readonly finalSignalCount = signal(0);
   readonly rankedCount = signal(0);
   readonly hasScanned = signal(false);
-
-  readonly symbolLimitMax = API_GATEWAY_SYMBOL_LIMIT_MAX;
-  readonly customSymbolLimitMax = CUSTOM_SYMBOL_LIMIT_MAX;
+  readonly scanStatus = signal<ScanJobStatus | null>(null);
+  readonly progressCompleted = signal(0);
+  readonly progressTotal = signal(0);
 
   minScore = DEFAULT_MIN_SCORE;
   strictRsi30 = true;
-  symbolLimit = DEFAULT_SYMBOL_LIMIT;
   customSymbolsText = '';
 
   constructor() {
@@ -54,63 +53,92 @@ export class StockAnalysisHome {
     this.results.set([]);
     this.hasScanned.set(false);
     this.error.set(null);
+    this.resetProgress();
     this.loadUniverse(segment);
   }
 
   runScan(): void {
     this.loading.set(true);
     this.error.set(null);
+    this.resetProgress();
+    this.scanStatus.set('pending');
 
     const segment = this.activeSegment();
     const customSymbols =
       segment === 'custom' ? parseCustomSymbols(this.customSymbolsText) : undefined;
 
-    if (segment === 'custom') {
-      if (!customSymbols?.length) {
-        this.error.set('Enter at least one NSE symbol (e.g. RELIANCE, TCS).');
-        this.loading.set(false);
-        return;
-      }
-      if (customSymbols.length > this.customSymbolLimitMax) {
-        this.error.set(
-          `Custom scans are limited to ${this.customSymbolLimitMax} symbols (API Gateway ~29s limit).`,
-        );
-        this.loading.set(false);
-        return;
-      }
+    if (segment === 'custom' && !customSymbols?.length) {
+      this.error.set('Enter at least one NSE symbol (e.g. RELIANCE, TCS).');
+      this.loading.set(false);
+      this.scanStatus.set(null);
+      return;
+    }
+
+    if (segment !== 'custom') {
+      this.progressTotal.set(this.universeSymbolCount());
+    } else {
+      this.progressTotal.set(customSymbols?.length ?? 0);
     }
 
     this.stockAnalysis
-      .runScan({
+      .runScanAsync({
         universeSegment: segment,
         symbols: customSymbols,
-        symbolLimit: segment === 'custom' ? undefined : this.symbolLimit,
         minScore: this.minScore,
         strictRsi30: this.strictRsi30,
         sleep: 0,
-        maxWorkers: 8,
+        maxWorkers: ASYNC_SCAN_MAX_WORKERS,
       })
       .subscribe({
-        next: response => {
-          this.results.set(response.rankedCandidates);
-          this.scannedCount.set(response.scannedCount);
-          this.finalSignalCount.set(response.finalSignalCount);
-          this.rankedCount.set(response.rankedCandidateCount);
+        next: job => {
+          this.scanStatus.set(job.status);
+          this.progressCompleted.set(job.progress?.completed ?? 0);
+          this.progressTotal.set(job.progress?.total ?? this.progressTotal());
+
+          if (job.status === 'failed') {
+            this.error.set(job.error ?? 'Scan job failed.');
+            this.loading.set(false);
+            return;
+          }
+
+          if (job.status !== 'complete') {
+            return;
+          }
+
+          this.results.set(job.rankedCandidates ?? []);
+          this.scannedCount.set(job.scannedCount ?? 0);
+          this.finalSignalCount.set(job.finalSignalCount ?? 0);
+          this.rankedCount.set(job.rankedCandidateCount ?? 0);
           this.hasScanned.set(true);
           this.loading.set(false);
         },
         error: err => {
-          const status = err?.status;
-          if (status === 504) {
-            this.error.set(
-              'Scan timed out (API Gateway ~29s limit). Lower symbol limit (try 20–30) and run again.',
-            );
-          } else {
-            this.error.set(err?.error?.message ?? 'Scan failed. Check that the API is running.');
-          }
+          this.error.set(err?.message ?? err?.error?.message ?? 'Scan failed. Check that the API is running.');
+          this.scanStatus.set('failed');
           this.loading.set(false);
         },
       });
+  }
+
+  progressPercent(): number {
+    const total = this.progressTotal();
+    if (!total) return 0;
+    return Math.min(100, Math.round((this.progressCompleted() / total) * 100));
+  }
+
+  scanStatusLabel(): string {
+    switch (this.scanStatus()) {
+      case 'pending':
+        return 'Starting scan…';
+      case 'running':
+        return `Scanning ${this.progressCompleted()} / ${this.progressTotal()} symbols…`;
+      case 'complete':
+        return 'Scan complete';
+      case 'failed':
+        return 'Scan failed';
+      default:
+        return '';
+    }
   }
 
   scoreClass(score: number | undefined): string {
@@ -152,18 +180,27 @@ export class StockAnalysisHome {
     return parseCustomSymbols(this.customSymbolsText).length;
   }
 
+  private resetProgress(): void {
+    this.progressCompleted.set(0);
+    this.progressTotal.set(0);
+    this.scanStatus.set(null);
+  }
+
   private loadUniverse(segment: UniverseSegment): void {
     if (segment === 'custom') {
+      this.universeSymbolCount.set(0);
       this.universeLabel.set('Custom watchlist · enter NSE symbols below');
       return;
     }
 
     this.universeLabel.set('Loading universe…');
     this.stockAnalysis.getUniverse(segment).subscribe({
-      next: universe =>
+      next: universe => {
+        this.universeSymbolCount.set(universe.symbolCount);
         this.universeLabel.set(
           `${universe.label} · ${universe.symbolCount} symbols · ${universe.source}`,
-        ),
+        );
+      },
       error: () => this.universeLabel.set('Universe unavailable for this segment.'),
     });
   }

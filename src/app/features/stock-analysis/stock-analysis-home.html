@@ -60,22 +60,13 @@
               placeholder="RELIANCE&#10;TCS&#10;INFY&#10;Or comma-separated: HDFCBANK, ICICIBANK"
               [(ngModel)]="customSymbolsText"></textarea>
             <span class="scanner__hint">
-              {{ customSymbolCount() }} symbol(s) · max {{ customSymbolLimitMax }} per scan
+              {{ customSymbolCount() }} symbol(s) · scanned asynchronously
             </span>
           </label>
         } @else {
-          <label class="scanner__field">
-            <span class="scanner__label">Symbol limit</span>
-            <input
-              class="scanner__input"
-              type="number"
-              min="1"
-              [max]="symbolLimitMax"
-              [(ngModel)]="symbolLimit" />
-            <span class="scanner__hint">
-              Scans run in parallel but must finish within API Gateway’s ~29s limit. Start with 20–30.
-            </span>
-          </label>
+          <p class="scanner__hint scanner__async-note">
+            Scans the full index universe asynchronously (all {{ universeSymbolCount() }} symbols).
+          </p>
         }
 
         <label class="scanner__field">
@@ -97,12 +88,21 @@
             (click)="runScan()">
             @if (loading()) {
               <span class="scanner__spinner" aria-hidden="true"></span>
-              Scanning market…
+              {{ scanStatusLabel() }}
             } @else {
               🚀 Run breakout scan
             }
           </button>
         </div>
+
+        @if (loading() && progressTotal() > 0) {
+          <div class="scanner__progress" aria-live="polite">
+            <div class="scanner__progress-bar">
+              <div class="scanner__progress-fill" [style.width.%]="progressPercent()"></div>
+            </div>
+            <span class="scanner__progress-text">{{ progressPercent() }}%</span>
+          </div>
+        }
 
         @if (error()) {
           <div class="scanner__error" role="alert">{{ error() }}</div>
