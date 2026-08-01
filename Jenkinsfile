@@ -46,10 +46,6 @@ pipeline {
         disableConcurrentBuilds()
     }
 
-    environment {
-        S3_BUCKET_PREFIX = 'jakshwealth-ui'
-    }
-
     stages {
         stage('Set environment') {
             steps {
@@ -60,6 +56,8 @@ pipeline {
                     env.AWS_REGION = props.aws_region ?: 'ap-south-2'
                     env.DEPLOY_ENV = props.deploy_env ?: 'dev'
                     env.BUCKET_REGION_SUFFIX = props.bucket_region_suffix ?: 'aps2'
+                    env.S3_UI_BUCKET = props.s3_ui_bucket ?: 'jakshwealth.com'
+                    env.CLOUDFRONT_DISTRIBUTION_ID = props.cloudfront_distribution_id ?: ''
                 }
             }
         }
@@ -69,7 +67,7 @@ pipeline {
                 sh """
                     export NPM_CONFIG_CACHE="${WORKSPACE}/.npm"
                     npm ci
-                    npm run buildDev
+                    npm run buildProd
                 """
             }
         }
@@ -80,7 +78,7 @@ pipeline {
                     jakshAws {
                         sh '''
                             aws sts get-caller-identity
-                            aws s3 sync dist/browser/. "s3://${S3_BUCKET_PREFIX}-${DEPLOY_ENV}-${BUCKET_REGION_SUFFIX}/" --delete
+                            aws s3 sync dist/browser/. "s3://${S3_UI_BUCKET}/" --delete
                         '''
                     }
                 }
@@ -92,9 +90,12 @@ pipeline {
                 script {
                     jakshAws {
                         sh '''
-                            CF_ID=$(aws cloudfront list-distributions \
-                              --query "DistributionList.Items[*].{id:Id,origin:Origins.Items[0].Id}[?origin=='S3-${S3_BUCKET_PREFIX}-${DEPLOY_ENV}-${BUCKET_REGION_SUFFIX}'].id" \
-                              --output text)
+                            CF_ID="${CLOUDFRONT_DISTRIBUTION_ID}"
+                            if [ -z "${CF_ID}" ] || [ "${CF_ID}" = "None" ]; then
+                              CF_ID=$(aws cloudfront list-distributions \
+                                --query "DistributionList.Items[?contains(Origins.Items[0].DomainName, '${S3_UI_BUCKET}')].Id | [0]" \
+                                --output text)
+                            fi
                             if [ -n "${CF_ID}" ] && [ "${CF_ID}" != "None" ]; then
                               aws cloudfront create-invalidation --distribution-id "${CF_ID}" --paths "/*"
                             else

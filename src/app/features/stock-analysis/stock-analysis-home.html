@@ -11,6 +11,18 @@
     </div>
   </header>
 
+  <nav class="scanner__tabs" aria-label="Index universe">
+    @for (tab of tabs; track tab.id) {
+      <button
+        type="button"
+        class="scanner__tab"
+        [class.scanner__tab--active]="activeSegment() === tab.id"
+        (click)="selectSegment(tab.id)">
+        {{ tab.label }}
+      </button>
+    }
+  </nav>
+
   @if (hasScanned()) {
     <section class="scanner__kpis" aria-label="Scan summary">
       <div class="scanner__kpi jw-glass-card">
@@ -40,28 +52,17 @@
 
       <div class="scanner__form">
         <label class="scanner__field">
-          <span class="scanner__label">Scan mode</span>
-          <select class="scanner__input" [(ngModel)]="useUniverse">
-            <option [ngValue]="true">NSE universe (limited)</option>
-            <option [ngValue]="false">Custom symbols</option>
-          </select>
+          <span class="scanner__label">Symbol limit</span>
+          <input
+            class="scanner__input"
+            type="number"
+            min="1"
+            [max]="symbolLimitMax"
+            [(ngModel)]="symbolLimit" />
+          <span class="scanner__hint">
+            Scans run in parallel but must finish within API Gateway’s ~29s limit. Start with 20–30.
+          </span>
         </label>
-
-        @if (useUniverse) {
-          <label class="scanner__field">
-            <span class="scanner__label">Symbol limit</span>
-            <input class="scanner__input" type="number" min="1" max="500" [(ngModel)]="symbolLimit" />
-          </label>
-        } @else {
-          <label class="scanner__field scanner__field--wide">
-            <span class="scanner__label">Symbols (comma or space separated)</span>
-            <input
-              class="scanner__input"
-              type="text"
-              placeholder="RELIANCE, TCS, INFY, HDFCBANK"
-              [(ngModel)]="symbolsInput" />
-          </label>
-        }
 
         <label class="scanner__field">
           <span class="scanner__label">Minimum score</span>
@@ -105,11 +106,20 @@
         }
       </div>
 
+      <p class="scanner__results-note">
+        Only stocks with score ≥ {{ minScore }}@if (strictRsi30) { and valid RSI cooling} appear here.
+      </p>
+
       @if (!results().length && !loading()) {
         <div class="scanner__empty">
           <span class="scanner__empty-icon" aria-hidden="true">🔍</span>
-          <p>Run a scan to discover ranked breakout candidates.</p>
-          <p class="scanner__empty-hint">Results appear here with scores, signals, and technical levels.</p>
+          @if (hasScanned()) {
+            <p>No stocks matched your score and RSI filters for this universe.</p>
+            <p class="scanner__empty-hint">Try lowering the minimum score or turning off strict RSI.</p>
+          } @else {
+            <p>Run a scan to discover ranked breakout candidates.</p>
+            <p class="scanner__empty-hint">Results appear here with scores, signals, and technical levels.</p>
+          }
         </div>
       }
 
@@ -149,7 +159,7 @@
                   <td class="scanner__num">₹{{ formatPrice(row.Close) }}</td>
                   <td class="scanner__num">{{ formatPrice(row.Current_HH) }}</td>
                   <td class="scanner__num">{{ formatPct(row.Distance_To_Breakout_pct) }}</td>
-                  <td class="scanner__num" [class.scanner__rsi--cool]="row.RSI14 != null && row.RSI14 < 35">
+                  <td class="scanner__num" [class.scanner__rsi--cool]="row.RSI14 !== null && row.RSI14 !== undefined && row.RSI14 < 35">
                     {{ row.RSI14 ?? '—' }}
                   </td>
                   <td class="scanner__status">{{ row.Scan_Status }}</td>

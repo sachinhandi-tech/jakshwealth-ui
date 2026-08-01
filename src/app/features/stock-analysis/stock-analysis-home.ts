@@ -1,7 +1,14 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { DEFAULT_MIN_SCORE, StockScanRow } from './stock-analysis.model';
+import {
+  API_GATEWAY_SYMBOL_LIMIT_MAX,
+  DEFAULT_MIN_SCORE,
+  DEFAULT_SYMBOL_LIMIT,
+  StockScanRow,
+  UNIVERSE_TABS,
+  UniverseSegment,
+} from './stock-analysis.model';
 import { StockAnalysisService } from './services/stock-analysis.service';
 
 @Component({
@@ -14,6 +21,8 @@ import { StockAnalysisService } from './services/stock-analysis.service';
 export class StockAnalysisHome {
   private readonly stockAnalysis = inject(StockAnalysisService);
 
+  readonly tabs = UNIVERSE_TABS;
+  readonly activeSegment = signal<UniverseSegment>('midcap');
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly universeLabel = signal('Loading universe…');
@@ -23,41 +32,62 @@ export class StockAnalysisHome {
   readonly rankedCount = signal(0);
   readonly hasScanned = signal(false);
 
-  symbolsInput = '';
+  readonly symbolLimitMax = API_GATEWAY_SYMBOL_LIMIT_MAX;
+
   minScore = DEFAULT_MIN_SCORE;
   strictRsi30 = true;
-  useUniverse = true;
-  symbolLimit = 20;
+  symbolLimit = DEFAULT_SYMBOL_LIMIT;
 
   constructor() {
-    this.stockAnalysis.getUniverse().subscribe({
-      next: universe =>
-        this.universeLabel.set(
-          `${universe.symbolCount} symbols · ${universe.source} · e.g. ${universe.sampleSymbols.slice(0, 3).join(', ')}`,
-        ),
-      error: () => this.universeLabel.set('Universe unavailable — enter symbols manually.'),
-    });
+    this.loadUniverse('midcap');
+  }
+
+  selectSegment(segment: UniverseSegment): void {
+    if (this.activeSegment() === segment) {
+      return;
+    }
+    this.activeSegment.set(segment);
+    this.results.set([]);
+    this.hasScanned.set(false);
+    this.error.set(null);
+    this.loadUniverse(segment);
   }
 
   runScan(): void {
     this.loading.set(true);
     this.error.set(null);
 
-    const request = this.buildRequest();
-    this.stockAnalysis.runScan(request).subscribe({
-      next: response => {
-        this.results.set(response.rankedCandidates.length ? response.rankedCandidates : response.results);
-        this.scannedCount.set(response.scannedCount);
-        this.finalSignalCount.set(response.finalSignalCount);
-        this.rankedCount.set(response.rankedCandidateCount);
-        this.hasScanned.set(true);
-        this.loading.set(false);
-      },
-      error: err => {
-        this.error.set(err?.error?.message ?? 'Scan failed. Check that the API is running.');
-        this.loading.set(false);
-      },
-    });
+    const segment = this.activeSegment();
+    this.stockAnalysis
+      .runScan({
+        universeSegment: segment,
+        symbolLimit: this.symbolLimit,
+        minScore: this.minScore,
+        strictRsi30: this.strictRsi30,
+        sleep: 0,
+        maxWorkers: 8,
+      })
+      .subscribe({
+        next: response => {
+          this.results.set(response.rankedCandidates);
+          this.scannedCount.set(response.scannedCount);
+          this.finalSignalCount.set(response.finalSignalCount);
+          this.rankedCount.set(response.rankedCandidateCount);
+          this.hasScanned.set(true);
+          this.loading.set(false);
+        },
+        error: err => {
+          const status = err?.status;
+          if (status === 504) {
+            this.error.set(
+              'Scan timed out (API Gateway ~29s limit). Lower symbol limit (try 20–30) and run again.',
+            );
+          } else {
+            this.error.set(err?.error?.message ?? 'Scan failed. Check that the API is running.');
+          }
+          this.loading.set(false);
+        },
+      });
   }
 
   scoreClass(score: number | undefined): string {
@@ -95,20 +125,14 @@ export class StockAnalysisHome {
     return `${value.toFixed(2)}%`;
   }
 
-  private buildRequest() {
-    if (this.useUniverse) {
-      return {
-        symbolLimit: this.symbolLimit,
-        minScore: this.minScore,
-        strictRsi30: this.strictRsi30,
-      };
-    }
-
-    const symbols = this.symbolsInput
-      .split(/[\s,]+/)
-      .map(symbol => symbol.trim())
-      .filter(Boolean);
-
-    return { symbols, minScore: this.minScore, strictRsi30: this.strictRsi30 };
+  private loadUniverse(segment: UniverseSegment): void {
+    this.universeLabel.set('Loading universe…');
+    this.stockAnalysis.getUniverse(segment).subscribe({
+      next: universe =>
+        this.universeLabel.set(
+          `${universe.label} · ${universe.symbolCount} symbols · ${universe.source}`,
+        ),
+      error: () => this.universeLabel.set('Universe unavailable for this segment.'),
+    });
   }
 }

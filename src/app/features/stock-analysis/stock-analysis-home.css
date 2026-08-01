@@ -36,6 +36,51 @@
   font-family: var(--font-mono);
 }
 
+.scanner__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.scanner__tab {
+  border: 1px solid var(--jw-border);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--jw-text-muted);
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.scanner__tab:hover {
+  color: var(--jw-text);
+  border-color: rgba(139, 92, 246, 0.45);
+}
+
+.scanner__tab--active {
+  color: var(--jw-text);
+  border-color: rgba(34, 211, 238, 0.55);
+  background: rgba(34, 211, 238, 0.08);
+}
+
+.scanner__hint,
+.scanner__results-note {
+  font-size: 0.75rem;
+  color: var(--jw-text-dim);
+  line-height: 1.4;
+}
+
+.scanner__hint {
+  display: block;
+  margin-top: 0.35rem;
+}
+
+.scanner__results-note {
+  margin: 0 0 1rem;
+}
+
 /* KPI cards */
 .scanner__kpis {
   display: grid;
