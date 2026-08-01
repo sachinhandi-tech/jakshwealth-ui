@@ -171,6 +171,30 @@
   box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15);
 }
 
+.scanner__textarea {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--jw-text);
+  font-size: 0.875rem;
+  font-family: var(--font-mono);
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 6.5rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.scanner__textarea:focus {
+  outline: none;
+  border-color: var(--jw-cyan);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15);
+}
+
+.scanner__textarea::placeholder {
+  color: var(--jw-text-dim);
+}
+
 .scanner__input option {
   background: var(--jw-bg-elevated);
 }

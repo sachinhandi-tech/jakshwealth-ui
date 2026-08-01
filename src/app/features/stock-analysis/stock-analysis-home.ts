@@ -3,8 +3,10 @@ import { FormsModule } from '@angular/forms';
 
 import {
   API_GATEWAY_SYMBOL_LIMIT_MAX,
+  CUSTOM_SYMBOL_LIMIT_MAX,
   DEFAULT_MIN_SCORE,
   DEFAULT_SYMBOL_LIMIT,
+  parseCustomSymbols,
   StockScanRow,
   UNIVERSE_TABS,
   UniverseSegment,
@@ -33,10 +35,12 @@ export class StockAnalysisHome {
   readonly hasScanned = signal(false);
 
   readonly symbolLimitMax = API_GATEWAY_SYMBOL_LIMIT_MAX;
+  readonly customSymbolLimitMax = CUSTOM_SYMBOL_LIMIT_MAX;
 
   minScore = DEFAULT_MIN_SCORE;
   strictRsi30 = true;
   symbolLimit = DEFAULT_SYMBOL_LIMIT;
+  customSymbolsText = '';
 
   constructor() {
     this.loadUniverse('midcap');
@@ -58,10 +62,29 @@ export class StockAnalysisHome {
     this.error.set(null);
 
     const segment = this.activeSegment();
+    const customSymbols =
+      segment === 'custom' ? parseCustomSymbols(this.customSymbolsText) : undefined;
+
+    if (segment === 'custom') {
+      if (!customSymbols?.length) {
+        this.error.set('Enter at least one NSE symbol (e.g. RELIANCE, TCS).');
+        this.loading.set(false);
+        return;
+      }
+      if (customSymbols.length > this.customSymbolLimitMax) {
+        this.error.set(
+          `Custom scans are limited to ${this.customSymbolLimitMax} symbols (API Gateway ~29s limit).`,
+        );
+        this.loading.set(false);
+        return;
+      }
+    }
+
     this.stockAnalysis
       .runScan({
         universeSegment: segment,
-        symbolLimit: this.symbolLimit,
+        symbols: customSymbols,
+        symbolLimit: segment === 'custom' ? undefined : this.symbolLimit,
         minScore: this.minScore,
         strictRsi30: this.strictRsi30,
         sleep: 0,
@@ -125,7 +148,16 @@ export class StockAnalysisHome {
     return `${value.toFixed(2)}%`;
   }
 
+  customSymbolCount(): number {
+    return parseCustomSymbols(this.customSymbolsText).length;
+  }
+
   private loadUniverse(segment: UniverseSegment): void {
+    if (segment === 'custom') {
+      this.universeLabel.set('Custom watchlist · enter NSE symbols below');
+      return;
+    }
+
     this.universeLabel.set('Loading universe…');
     this.stockAnalysis.getUniverse(segment).subscribe({
       next: universe =>

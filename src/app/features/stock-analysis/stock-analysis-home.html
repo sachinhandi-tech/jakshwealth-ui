@@ -51,18 +51,32 @@
       </h2>
 
       <div class="scanner__form">
-        <label class="scanner__field">
-          <span class="scanner__label">Symbol limit</span>
-          <input
-            class="scanner__input"
-            type="number"
-            min="1"
-            [max]="symbolLimitMax"
-            [(ngModel)]="symbolLimit" />
-          <span class="scanner__hint">
-            Scans run in parallel but must finish within API Gateway’s ~29s limit. Start with 20–30.
-          </span>
-        </label>
+        @if (activeSegment() === 'custom') {
+          <label class="scanner__field scanner__field--wide">
+            <span class="scanner__label">Symbols</span>
+            <textarea
+              class="scanner__textarea"
+              rows="5"
+              placeholder="RELIANCE&#10;TCS&#10;INFY&#10;Or comma-separated: HDFCBANK, ICICIBANK"
+              [(ngModel)]="customSymbolsText"></textarea>
+            <span class="scanner__hint">
+              {{ customSymbolCount() }} symbol(s) · max {{ customSymbolLimitMax }} per scan
+            </span>
+          </label>
+        } @else {
+          <label class="scanner__field">
+            <span class="scanner__label">Symbol limit</span>
+            <input
+              class="scanner__input"
+              type="number"
+              min="1"
+              [max]="symbolLimitMax"
+              [(ngModel)]="symbolLimit" />
+            <span class="scanner__hint">
+              Scans run in parallel but must finish within API Gateway’s ~29s limit. Start with 20–30.
+            </span>
+          </label>
+        }
 
         <label class="scanner__field">
           <span class="scanner__label">Minimum score</span>
