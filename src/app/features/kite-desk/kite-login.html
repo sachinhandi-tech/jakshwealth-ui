@@ -3,15 +3,14 @@
     <span class="kite-login__eyebrow">Zerodha Kite Connect</span>
     <h1>Sign in once. <span class="jw-gradient-text">Trade from the desk.</span></h1>
     <p>
-      The login creates an access token on the Python server and stores it there.
-      The browser never receives that token, and a local restart reuses it until Zerodha expires it.
+      The login creates an access token on the Kite Lambda and stores it there.
+      The browser never receives that token.
     </p>
   </section>
 
   @if (backendOffline()) {
     <p class="kite-login__alert" role="alert">
-      The Kite API is not running. From <code>jakshwealth-api</code>, start
-      <code>python -m uvicorn kite_app.main:app --host 127.0.0.1 --port 8010 --reload --reload-dir kite_app</code>
+      The Kite Lambda did not respond. Rebuild the jakshwealth-api Jenkins job so <code>jw_kite</code> is deployed, then try again.
     </p>
   }
 
@@ -70,8 +69,7 @@
     <aside class="kite-login__steps jw-glass-card">
       <h2>Setup</h2>
       <ol>
-        <li>Install Python dependencies and start FastAPI on port 8010. Commands are in <code>jakshwealth-api/kite_app/README.md</code>.</li>
-        <li>Start this UI with <code>npm start</code> from <code>jakshwealth-ui</code>.</li>
+        <li>The desk calls the deployed Kite Lambda. It does not use a server on this PC.</li>
         <li>Open the Kite login link for your API key and sign in with the Zerodha client ID saved on the app.</li>
         <li>Copy <code>request_token</code> from the redirect URL. It works only once.</li>
         <li>Submit this form. The next screen is your dashboard.</li>

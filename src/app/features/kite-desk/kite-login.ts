@@ -66,7 +66,7 @@ function readError(err: { error?: { detail?: unknown }; message?: string }): str
     return detail;
   }
   if (err?.message?.includes('Http failure')) {
-    return 'Cannot reach the Kite API. Start the FastAPI server on port 8010, then try again.';
+    return 'Cannot reach the Kite Lambda. Rebuild the jakshwealth-api job, then try again.';
   }
   return 'Login failed. Check the API key, secret, and request token.';
 }
