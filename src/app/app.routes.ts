@@ -1,27 +1,26 @@
 import { Routes } from '@angular/router';
 
+import { kiteAuthGuard } from './features/kite-desk/kite.guard';
+
 export const routes: Routes = [
+  { path: '', pathMatch: 'full', redirectTo: 'kite/dashboard' },
   {
-    path: '',
-    pathMatch: 'full',
-    redirectTo: 'stock-analysis',
+    path: 'kite',
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+      {
+        path: 'login',
+        title: 'Kite login',
+        loadComponent: () => import('./features/kite-desk/kite-login').then(m => m.KiteLogin),
+      },
+      {
+        path: 'dashboard',
+        title: 'Kite dashboard',
+        canActivate: [kiteAuthGuard],
+        loadComponent: () =>
+          import('./features/kite-desk/kite-dashboard').then(m => m.KiteDashboard),
+      },
+    ],
   },
-  {
-    path: 'about',
-    title: 'About',
-    loadComponent: () => import('./components/about/about').then(m => m.About),
-  },
-  {
-    path: 'home',
-    title: 'Home',
-    loadComponent: () => import('./components/landing/landing').then(m => m.Landing),
-  },
-  {
-    path: 'stock-analysis',
-    title: 'Stock Analysis',
-    loadComponent: () => import('./layout/feature-layout').then(m => m.FeatureLayout),
-    loadChildren: () =>
-      import('./features/stock-analysis/stock-analysis.routes').then(m => m.STOCK_ANALYSIS_ROUTES),
-  },
-  { path: '**', redirectTo: 'stock-analysis' },
+  { path: '**', redirectTo: 'kite/dashboard' },
 ];

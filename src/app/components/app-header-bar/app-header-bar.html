@@ -1,6 +1,6 @@
 <header class="jw-nav">
   <div class="jw-nav__inner">
-    <a class="jw-nav__brand" routerLink="/home" aria-label="JakshWealth home">
+    <a class="jw-nav__brand" routerLink="/kite" aria-label="Kite desk">
       <span class="jw-nav__logo" aria-hidden="true">
         <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
           <rect width="32" height="32" rx="8" fill="url(#navLogoBg)"/>
@@ -22,14 +22,7 @@
     </a>
 
     <nav class="jw-nav__links" aria-label="Primary navigation">
-      @for (item of navItems(); track item.route) {
-        <a
-          class="jw-nav__link"
-          [class.jw-nav__link--active]="selectedNav() === item.label"
-          [routerLink]="item.route">
-          {{ item.label }}
-        </a>
-      }
+      <a class="jw-nav__link jw-nav__link--active" routerLink="/kite">Kite</a>
     </nav>
   </div>
 </header>

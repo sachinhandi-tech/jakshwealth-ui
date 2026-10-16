@@ -1,16 +1,15 @@
 # JakshWealth UI
 
-Angular **21** frontend for personal NSE stock analysis. Deployed with **jakshwealth-infra** (S3 + CloudFront) and **jakshwealth-api** (`/jw-api/`).
+Angular frontend for the live Zerodha Kite desk.
 
 ## Local dev
 
-```bash
+```powershell
+copy src\environments\environment.development.example.ts src\environments\environment.development.ts
 npm install
 npm start
 ```
 
-Copy `src/environments/environment.development.example.ts` → `environment.development.ts` and set your Okta client ID.
+Open http://localhost:4200/kite/login
 
-## Deploy
-
-Jenkins pipeline: `.cicd/Jenkinsfile` — build Angular, sync to S3, invalidate CloudFront.
+The FastAPI backend is `jakshwealth-api/kite_app`. See that folder's README for the API start command.

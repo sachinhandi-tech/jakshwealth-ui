@@ -1,0 +1,353 @@
+<div class="desk jw-page">
+  <header class="desk__header">
+    <div>
+      <span class="desk__eyebrow">Kite desk</span>
+      <h1>{{ profile()?.user_name || 'Dashboard' }}</h1>
+      <p>Live Zerodha account data from the saved server session.</p>
+    </div>
+    <button type="button" class="jw-btn jw-btn--ghost" (click)="logout()">Log out</button>
+  </header>
+
+  <nav class="desk__tabs" aria-label="Dashboard sections">
+    @for (tab of tabs; track tab.id) {
+      <button
+        type="button"
+        class="desk__tab"
+        [class.desk__tab--active]="activeTab() === tab.id"
+        (click)="selectTab(tab.id)">
+        {{ tab.label }}
+      </button>
+    }
+  </nav>
+
+  @switch (activeTab()) {
+    @case ('user') {
+      @if (profileLoading()) {
+        <p class="desk__status">Loading profile…</p>
+      } @else if (profileError()) {
+        <p class="desk__alert" role="alert">{{ profileError() }}</p>
+      } @else if (profile(); as user) {
+        <section class="desk__grid" aria-label="User profile">
+          <article class="jw-glass-card desk__stat">
+            <span class="desk__label">User Name</span>
+            <strong>{{ user.user_name }}</strong>
+          </article>
+          <article class="jw-glass-card desk__stat">
+            <span class="desk__label">User ID</span>
+            <strong>{{ user.user_id }}</strong>
+          </article>
+          <article class="jw-glass-card desk__stat desk__stat--wide">
+            <span class="desk__label">Products</span>
+            <div class="desk__chips">
+              @for (product of user.products; track product) {
+                <span class="desk__chip">{{ product }}</span>
+              } @empty {
+                <span class="desk__empty">No products enabled</span>
+              }
+            </div>
+          </article>
+          <article class="jw-glass-card desk__stat desk__stat--wide">
+            <span class="desk__label">Exchanges</span>
+            <div class="desk__chips">
+              @for (exchange of user.exchanges; track exchange) {
+                <span class="desk__chip">{{ exchange }}</span>
+              } @empty {
+                <span class="desk__empty">No exchanges enabled</span>
+              }
+            </div>
+          </article>
+        </section>
+      }
+    }
+    @case ('market') {
+      <section class="jw-glass-card desk__panel">
+        <div class="desk__panel-head">
+          <h2>NSE quotes</h2>
+          <button type="button" class="jw-btn jw-btn--ghost" (click)="loadQuotes()" [disabled]="quotesLoading()">
+            {{ quotesLoading() ? 'Refreshing…' : 'Refresh' }}
+          </button>
+        </div>
+        @if (quoteError()) {
+          <p class="desk__alert" role="alert">{{ quoteError() }}</p>
+        }
+        @if (quotes().length === 0 && !quoteError()) {
+          <p class="desk__status">{{ quotesLoading() ? 'Loading quotes…' : 'No quotes yet.' }}</p>
+        }
+        @if (quotes().length > 0) {
+          <div class="desk__table" role="table" aria-label="Live quotes">
+            <div class="desk__row desk__row--head" role="row">
+              <span role="columnheader">Symbol</span>
+              <span role="columnheader">Last</span>
+              <span role="columnheader">Change</span>
+              <span role="columnheader">Volume</span>
+            </div>
+            @for (quote of quotes(); track quote.symbol) {
+              <div class="desk__row" role="row">
+                <span role="cell"><strong>{{ quote.symbol }}</strong> <em>{{ quote.exchange }}</em></span>
+                <span role="cell">{{ quote.last_price ?? '—' }}</span>
+                <span role="cell" [class.desk__up]="(quote.change_percent ?? 0) > 0" [class.desk__down]="(quote.change_percent ?? 0) < 0">
+                  {{ quote.change_percent === null ? '—' : (quote.change_percent + '%') }}
+                </span>
+                <span role="cell">{{ quote.volume ?? '—' }}</span>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    }
+    @case ('signals') {
+      <section class="jw-glass-card desk__panel">
+        <div class="desk__panel-head">
+          <div>
+            <h2>Nifty 100 crossovers</h2>
+            <p class="desk__note">
+              Short term watches the fast average cross the slow one. The default is a 20 EMA crossing a 50 SMA.
+              Long term watches the close cross the 200 SMA.
+            </p>
+          </div>
+        </div>
+
+        <nav class="desk__tabs desk__subtabs" aria-label="Signal horizon">
+          @for (kind of horizonKinds; track kind) {
+            <button
+              type="button"
+              class="desk__tab"
+              [class.desk__tab--active]="activeHorizon() === kind"
+              (click)="activeHorizon.set(kind)">
+              {{ horizonName(kind) }}
+            </button>
+          }
+        </nav>
+
+        @for (kind of [activeHorizon()]; track kind) {
+          @if (kind === 'short') {
+            <form class="desk__form desk__form--strategy" (ngSubmit)="generateSignals(kind)">
+              <label class="desk__field">
+                <span>Fast average</span>
+                <select class="desk__input" name="shortType" [(ngModel)]="scans.short.shortType">
+                  <option value="ema">EMA</option>
+                  <option value="sma">SMA</option>
+                  <option value="wma">WMA</option>
+                </select>
+              </label>
+              <label class="desk__field">
+                <span>Fast period</span>
+                <input class="desk__input" type="number" name="shortWindow" min="2" max="200" [(ngModel)]="scans.short.shortWindow" required />
+              </label>
+              <label class="desk__field">
+                <span>Slow average</span>
+                <select class="desk__input" name="longType" [(ngModel)]="scans.short.longType">
+                  <option value="sma">SMA</option>
+                  <option value="ema">EMA</option>
+                  <option value="wma">WMA</option>
+                </select>
+              </label>
+              <label class="desk__field">
+                <span>Slow period</span>
+                <input class="desk__input" type="number" name="longWindow" min="3" max="400" [(ngModel)]="scans.short.longWindow" required />
+              </label>
+              <label class="desk__field">
+                <span>Long-term SMA</span>
+                <input class="desk__input" type="number" name="trendWindow" min="2" max="400" [(ngModel)]="scans.short.trendWindow" required />
+              </label>
+              <label class="desk__field">
+                <span>Lookback Days</span>
+                <input class="desk__input" type="number" name="shortLookback" min="1" max="400" [(ngModel)]="scans.short.lookbackDays" required />
+              </label>
+              <label class="desk__field">
+                <span>Max Stocks</span>
+                <input class="desk__input" type="number" name="shortMax" min="1" max="100" [(ngModel)]="scans.short.maxStocks" required />
+              </label>
+              <button class="jw-btn jw-btn--primary" type="submit" [disabled]="scanLoading().short">
+                {{ scanLoading().short ? 'Scanning…' : 'Generate short term' }}
+              </button>
+            </form>
+          } @else {
+            <form class="desk__form" (ngSubmit)="generateSignals(kind)">
+              <label class="desk__field">
+                <span>SMA period</span>
+                <input class="desk__input" type="number" name="longTrend" min="2" max="400" [(ngModel)]="scans.long.trendWindow" required />
+              </label>
+              <label class="desk__field">
+                <span>Lookback Days</span>
+                <input class="desk__input" type="number" name="longLookback" min="1" max="400" [(ngModel)]="scans.long.lookbackDays" required />
+              </label>
+              <label class="desk__field">
+                <span>Max Stocks</span>
+                <input class="desk__input" type="number" name="longMax" min="1" max="100" [(ngModel)]="scans.long.maxStocks" required />
+              </label>
+              <button class="jw-btn jw-btn--primary" type="submit" [disabled]="scanLoading().long">
+                {{ scanLoading().long ? 'Scanning…' : 'Generate long term' }}
+              </button>
+            </form>
+          }
+          <p class="desk__note">Each scan reads daily Kite candles for the Nifty 100 list and takes about a minute. The 200 SMA needs about a year of daily history.</p>
+
+          @if (scanError()[kind]; as error) {
+            <p class="desk__alert" role="alert">{{ error }}</p>
+          }
+          @if (scanLoading()[kind]) {
+            <p class="desk__status">Loading the official Nifty 100 list and daily Kite candles…</p>
+          }
+          @if (scanResult()[kind]; as result) {
+            <p class="desk__note">
+              Checked {{ result.scanned }} of {{ result.universe }} Nifty 100 stocks.
+              @if (result.skipped > 0) {
+                {{ result.skipped }} had no matching NSE history.
+              }
+            </p>
+            @if (result.signals.length === 0) {
+              <p class="desk__status">No crossovers in the last {{ result.lookback_days }} trading days.</p>
+            } @else if (kind === 'short') {
+              <div class="desk__scroll">
+                <div class="desk__table" role="table" aria-label="Short-term crossover signals">
+                  <div class="desk__row desk__row--signals desk__row--short desk__row--head" role="row">
+                    <span role="columnheader">Rank</span>
+                    <span role="columnheader">Ticker</span>
+                    <span role="columnheader">Company</span>
+                    <span role="columnheader">Crossover Type</span>
+                    <span role="columnheader">Crossover Date</span>
+                    <span role="columnheader">Close</span>
+                    <span role="columnheader">{{ averageName(result.short_type) }} {{ result.short_window }}</span>
+                    <span role="columnheader">{{ averageName(result.long_type) }} {{ result.long_window }}</span>
+                    <span role="columnheader">SMA {{ result.trend_window }}</span>
+                    <span role="columnheader">Long-term</span>
+                  </div>
+                  @for (row of result.signals; track row.ticker + row.crossover_date) {
+                    <div class="desk__row desk__row--signals desk__row--short" role="row">
+                      <span role="cell">{{ row.rank }}</span>
+                      <span role="cell"><strong>{{ row.ticker }}</strong></span>
+                      <span role="cell">{{ row.company }}</span>
+                      <span role="cell">
+                        <span class="desk__badge" [class.desk__badge--bull]="row.crossover_type === 'bullish'" [class.desk__badge--bear]="row.crossover_type === 'bearish'">
+                          {{ row.crossover_type === 'bullish' ? 'Bullish' : 'Bearish' }}
+                        </span>
+                      </span>
+                      <span role="cell">{{ row.crossover_date | date:'dd MMM yyyy' }}</span>
+                      <span role="cell">{{ row.close | number:'1.2-2' }}</span>
+                      <span role="cell">{{ row.short_sma | number:'1.2-2' }}</span>
+                      <span role="cell">{{ row.long_sma | number:'1.2-2' }}</span>
+                      <span role="cell">{{ row.trend_sma === null ? '—' : (row.trend_sma | number:'1.2-2') }}</span>
+                      <span role="cell">{{ row.trend_bias === 'above' ? 'Above' : row.trend_bias === 'below' ? 'Below' : '—' }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            } @else {
+              <div class="desk__scroll">
+                <div class="desk__table" role="table" aria-label="Long-term SMA signals">
+                  <div class="desk__row desk__row--signals desk__row--head" role="row">
+                    <span role="columnheader">Rank</span>
+                    <span role="columnheader">Ticker</span>
+                    <span role="columnheader">Company</span>
+                    <span role="columnheader">Crossover Type</span>
+                    <span role="columnheader">Crossover Date</span>
+                    <span role="columnheader">Close</span>
+                    <span role="columnheader">SMA {{ result.long_window }}</span>
+                    <span role="columnheader">Long-term</span>
+                  </div>
+                  @for (row of result.signals; track row.ticker + row.crossover_date) {
+                    <div class="desk__row desk__row--signals" role="row">
+                      <span role="cell">{{ row.rank }}</span>
+                      <span role="cell"><strong>{{ row.ticker }}</strong></span>
+                      <span role="cell">{{ row.company }}</span>
+                      <span role="cell">
+                        <span class="desk__badge" [class.desk__badge--bull]="row.crossover_type === 'bullish'" [class.desk__badge--bear]="row.crossover_type === 'bearish'">
+                          {{ row.crossover_type === 'bullish' ? 'Bullish' : 'Bearish' }}
+                        </span>
+                      </span>
+                      <span role="cell">{{ row.crossover_date | date:'dd MMM yyyy' }}</span>
+                      <span role="cell">{{ row.close | number:'1.2-2' }}</span>
+                      <span role="cell">{{ row.long_sma | number:'1.2-2' }}</span>
+                      <span role="cell">{{ row.trend_bias === 'above' ? 'Above' : row.trend_bias === 'below' ? 'Below' : '—' }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          }
+        }
+      </section>
+    }
+    @case ('univest') {
+      <section class="jw-glass-card desk__panel">
+        <div class="desk__panel-head">
+          <div>
+            <h2>Univest alerts</h2>
+            <p class="desk__note">
+              MacroDroid Test does not include a Univest alert, so a 200 response can still mean the text was empty.
+              A real Univest push is listed here. Nothing on this tab places a Zerodha order.
+            </p>
+          </div>
+        </div>
+        <form class="desk__univest" (ngSubmit)="parseUnivest()">
+          <label class="desk__field desk__field--wide">
+            <span>Notification text</span>
+            <textarea
+              class="desk__input desk__textarea"
+              name="univestText"
+              rows="6"
+              [(ngModel)]="univestText"
+              placeholder="BUY SBIN&#10;Entry: 820.50&#10;SL: 805&#10;Target: 850&#10;CNC"></textarea>
+          </label>
+          <button class="jw-btn jw-btn--primary" type="submit" [disabled]="univestLoading()">
+            {{ univestLoading() ? 'Parsing…' : 'Parse alert' }}
+          </button>
+        </form>
+        @if (univestError()) {
+          <p class="desk__alert" role="alert">{{ univestError() }}</p>
+        }
+        @if (univestResult()?.payload; as alert) {
+          <div class="desk__grid" aria-label="Parsed Univest signal">
+            <article class="jw-glass-card desk__stat">
+              <span class="desk__label">Symbol</span>
+              <strong>{{ alert.symbol }}</strong>
+            </article>
+            <article class="jw-glass-card desk__stat">
+              <span class="desk__label">Action</span>
+              <strong [class.desk__up]="alert.transaction_type === 'BUY'" [class.desk__down]="alert.transaction_type === 'SELL'">
+                {{ alert.transaction_type }}
+              </strong>
+            </article>
+            <article class="jw-glass-card desk__stat">
+              <span class="desk__label">Entry</span>
+              <strong>{{ alert.entry_price | number:'1.2-2' }}</strong>
+            </article>
+            <article class="jw-glass-card desk__stat">
+              <span class="desk__label">Stop loss</span>
+              <strong>{{ alert.stop_loss === null ? '—' : (alert.stop_loss | number:'1.2-2') }}</strong>
+            </article>
+            <article class="jw-glass-card desk__stat">
+              <span class="desk__label">Target</span>
+              <strong>{{ alert.target === null ? '—' : (alert.target | number:'1.2-2') }}</strong>
+            </article>
+            <article class="jw-glass-card desk__stat">
+              <span class="desk__label">Product</span>
+              <strong>{{ alert.product || '—' }}</strong>
+            </article>
+          </div>
+          <pre class="desk__json">{{ univestResult() | json }}</pre>
+        }
+        <h3 class="desk__subhead">From the phone</h3>
+        @if (univestAttempts().length === 0) {
+          <p class="desk__note">Nothing has arrived since this tab was opened. Run the macro again after a real Univest notification.</p>
+        } @else {
+          <div class="desk__attempts">
+            @for (item of univestAttempts(); track $index) {
+              <article class="desk__attempt">
+                <div class="desk__attempt-head">
+                  <strong>{{ item.accepted ? (item.payload?.symbol + ' ' + item.payload?.transaction_type) : 'Ignored' }}</strong>
+                  <span>{{ item.received_at | date:'HH:mm:ss' }}</span>
+                </div>
+                @if (item.error) {
+                  <p class="desk__alert">{{ item.error }}</p>
+                }
+                <p class="desk__preview">{{ item.preview || 'Empty body' }}</p>
+              </article>
+            }
+          </div>
+        }
+      </section>
+    }
+  }
+</div>

@@ -1,0 +1,340 @@
+/* Colors come from :root in src/styles.css. Change those tokens to restyle the desk. */
+
+.desk {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 2.5rem;
+}
+
+.desk__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+.desk__eyebrow {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--jw-purple);
+}
+
+.desk h1 {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  margin-bottom: 0.35rem;
+}
+
+.desk__header p,
+.desk__note,
+.desk__status,
+.desk__empty {
+  color: var(--jw-text-muted);
+}
+
+.desk__header p {
+  max-width: 36rem;
+}
+
+.desk__header code {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+}
+
+.desk__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.desk__subtabs {
+  margin-bottom: 1rem;
+}
+
+.desk__tab {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--jw-text-muted);
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.desk__tab--active {
+  color: var(--jw-text);
+  border-color: rgba(0, 212, 255, 0.55);
+  background: rgba(0, 212, 255, 0.08);
+}
+
+.desk__grid,
+.desk__strategy-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.desk__stat,
+.desk__strategy,
+.desk__panel {
+  padding: 1.25rem 1.5rem;
+}
+
+.desk__stat--wide {
+  grid-column: 1 / -1;
+}
+
+.desk__label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--jw-text-dim);
+}
+
+.desk__stat strong {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+}
+
+.desk__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.desk__chip {
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(0, 212, 255, 0.1);
+  color: var(--jw-cyan);
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.desk__panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.desk__panel-head h2,
+.desk__strategy h2 {
+  font-size: 1.05rem;
+}
+
+.desk__strategy p {
+  margin-top: 0.4rem;
+  color: var(--jw-text-muted);
+}
+
+.desk__table {
+  display: flex;
+  flex-direction: column;
+}
+
+.desk__form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  gap: 0.75rem;
+  align-items: end;
+  margin-bottom: 0.75rem;
+}
+
+.desk__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--jw-text-dim);
+}
+
+.desk__input {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--jw-text);
+  font-size: 0.9375rem;
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+.desk__field--wide {
+  grid-column: 1 / -1;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.8125rem;
+}
+
+.desk__univest {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.desk__textarea {
+  min-height: 8rem;
+  resize: vertical;
+  font-family: var(--font-mono);
+}
+
+.desk__subhead {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.desk__attempts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.desk__attempt {
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.desk__attempt-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.35rem;
+}
+
+.desk__preview {
+  margin: 0.35rem 0 0;
+  color: var(--jw-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+}
+
+.desk__json {
+  margin: 1rem 0 0;
+  padding: 1rem;
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--jw-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+}
+
+.desk__input:focus {
+  outline: none;
+  border-color: var(--jw-cyan);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.15);
+}
+
+.desk__scroll {
+  overflow-x: auto;
+  margin-top: 0.75rem;
+}
+
+.desk__row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.desk__form--strategy {
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+}
+
+.desk__row--signals {
+  grid-template-columns: 3.2rem 6.5rem minmax(10rem, 1.5fr) 8rem 8rem 5.5rem 5.5rem 5.5rem;
+  min-width: 52rem;
+  align-items: center;
+}
+
+.desk__row--short {
+  grid-template-columns: 3.2rem 6.5rem minmax(9rem, 1.4fr) 8rem 8rem 5.5rem 5.5rem 5.5rem 5.5rem 6.5rem;
+  min-width: 68rem;
+}
+
+.desk__badge {
+  display: inline-flex;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.desk__badge--bull {
+  color: var(--jw-green);
+  background: rgba(16, 185, 129, 0.15);
+}
+
+.desk__badge--bear {
+  color: var(--jw-red);
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.desk__row--head {
+  color: var(--jw-text-dim);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-top: none;
+}
+
+.desk__row em {
+  color: var(--jw-text-dim);
+  font-style: normal;
+  font-size: 0.75rem;
+}
+
+.desk__up { color: var(--jw-green); }
+.desk__down { color: var(--jw-red); }
+
+.desk__alert {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  background: rgba(239, 68, 68, 0.12);
+  color: #fecaca;
+}
+
+.desk__note {
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 900px) {
+  .desk__form {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .desk__header,
+  .desk__grid,
+  .desk__strategy-grid,
+  .desk__row:not(.desk__row--signals) {
+    grid-template-columns: 1fr;
+  }
+
+  .desk__header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
