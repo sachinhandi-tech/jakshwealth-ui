@@ -1,0 +1,62 @@
+.gtt {
+  background: #070b14;
+}
+
+.gtt__head h2 {
+  font-size: 1.15rem;
+}
+
+.gtt__head p,
+.gtt__table-title {
+  color: var(--jw-text-muted);
+}
+
+.gtt__head p {
+  margin: 0.35rem 0 0;
+  max-width: 52rem;
+  font-size: 0.875rem;
+}
+
+.gtt__table-title {
+  margin: 0.9rem 0 0.5rem;
+  color: var(--jw-text);
+  font-size: 0.95rem;
+}
+
+.gtt__scroll {
+  overflow-x: auto;
+}
+
+.gtt__table {
+  width: 100%;
+  min-width: 78rem;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.gtt__table th,
+.gtt__table td {
+  padding: 0.4rem 0.55rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.gtt__table th {
+  color: var(--jw-text-dim);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.gtt__symbol {
+  color: var(--jw-text);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.gtt__ok { color: var(--jw-green); }
+.gtt__bad { color: var(--jw-red); }

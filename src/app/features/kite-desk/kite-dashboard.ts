@@ -15,14 +15,18 @@ import {
   MovingAverageType,
   SignalHorizon,
 } from './kite.model';
+import { AlgoDeskStore } from './algo-desk.store';
+import { AlgoSignals } from './algo-signals';
+import { GttPlacement } from './gtt-placement';
 import { KiteService } from './kite.service';
 
 @Component({
   selector: 'app-kite-dashboard',
-  imports: [FormsModule, DatePipe, DecimalPipe],
+  imports: [FormsModule, DatePipe, DecimalPipe, AlgoSignals, GttPlacement],
   templateUrl: './kite-dashboard.html',
   styleUrl: './kite-dashboard.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [AlgoDeskStore],
 })
 export class KiteDashboard implements OnDestroy {
   private readonly kite = inject(KiteService);
@@ -32,6 +36,8 @@ export class KiteDashboard implements OnDestroy {
     { id: 'user', label: 'User' },
     { id: 'market', label: 'Market' },
     { id: 'signals', label: 'Signals' },
+    { id: 'algo', label: 'Algo Signals' },
+    { id: 'gtt', label: 'GTT Placement' },
   ];
 
   readonly activeTab = signal<KiteDeskTab>('user');

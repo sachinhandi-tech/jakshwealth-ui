@@ -75,7 +75,48 @@ export interface KiteSignalResult {
   signals: KiteSignal[];
 }
 
-export type KiteDeskTab = 'user' | 'market' | 'signals';
+export interface OhlcQuote {
+  symbol: string;
+  last_price: number | null;
+}
+
+export interface OhlcSnapshot {
+  quotes: OhlcQuote[];
+}
+
+export interface GttOrderRequest {
+  symbol: string;
+  quantity: number;
+  buy_price: number | null;
+  stoploss: number | null;
+  last_price: number | null;
+}
+
+export interface GttOrderResult {
+  symbol: string;
+  quantity: number;
+  buy_price: number | null;
+  stoploss: number | null;
+  tick_size: number | null;
+  last_price: number | null;
+  account_state: string;
+  position_quantity: number;
+  active_buy_trigger_id: string | null;
+  active_stoploss_trigger_id: string | null;
+  day_buy_order_id: string | null;
+  day_buy_order_status: string | null;
+  buy_status: string;
+  buy_trigger_id: string | null;
+  stoploss_status: string;
+  stoploss_trigger_id: string | null;
+  message: string;
+}
+
+export interface GttOrderResponse {
+  orders: GttOrderResult[];
+}
+
+export type KiteDeskTab = 'user' | 'market' | 'signals' | 'algo' | 'gtt';
 
 export interface KiteDeskTabItem {
   id: KiteDeskTab;

@@ -1,0 +1,62 @@
+<section class="jw-glass-card desk__panel gtt" aria-labelledby="gtt-placement-title">
+  <div class="gtt__head">
+    <h2 id="gtt-placement-title">GTT Order Placement</h2>
+    <p>Read-only status from Algo Signals · Qty 1 · Buy GTT at breakout candle low · Stoploss 5% below buy · State from Kite orders, positions, holdings, and GTTs</p>
+  </div>
+  @if (store.gttError(); as message) {
+    <p class="desk__alert" role="alert">{{ message }}</p>
+  }
+  @if (store.loading()) {
+    <p class="desk__status">Loading scanner cache...</p>
+  } @else if (store.error(); as message) {
+    <p class="desk__alert" role="alert">{{ message }}</p>
+  } @else {
+    <h3 class="gtt__table-title">Kite GTT Placement</h3>
+    @if (store.gttRows().length === 0) {
+      <p class="desk__status">No breakout retest setups match the current parameters.</p>
+    } @else {
+      <div class="gtt__scroll">
+        <table class="gtt__table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Symbol</th>
+              <th>Qty</th>
+              <th>Buy</th>
+              <th>Stoploss</th>
+              <th>Last Price</th>
+              <th>Account State</th>
+              <th>Buy Status</th>
+              <th>Buy Trigger</th>
+              <th>Day Buy Order</th>
+              <th>Position Qty</th>
+              <th>Stoploss Status</th>
+              <th>Stoploss Trigger</th>
+              <th>Message</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of store.gttRows(); track row.symbol) {
+              <tr>
+                <td>{{ row.rank }}</td>
+                <td><strong class="gtt__symbol">{{ row.symbol }}</strong></td>
+                <td>{{ row.quantity }}</td>
+                <td>{{ price(row.buyPrice) }}</td>
+                <td>{{ price(row.stoploss) }}</td>
+                <td>{{ lastPrice(row.lastPrice) }}</td>
+                <td>{{ row.accountState }}</td>
+                <td [class.gtt__ok]="row.buyStatus === 'success' || row.buyStatus === 'ready'" [class.gtt__bad]="row.buyStatus === 'failed' || row.buyStatus === 'blocked'">{{ row.buyStatus }}</td>
+                <td>{{ row.buyTriggerId || '—' }}</td>
+                <td>{{ dayOrder(row) }}</td>
+                <td>{{ row.positionQuantity }}</td>
+                <td>{{ row.stoplossStatus }}</td>
+                <td>{{ row.stoplossTriggerId || '—' }}</td>
+                <td>{{ row.message || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</section>

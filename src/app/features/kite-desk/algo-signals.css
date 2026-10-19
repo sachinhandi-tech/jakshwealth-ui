@@ -1,0 +1,94 @@
+.algo {
+  background: #070b14;
+}
+
+.algo__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.algo__head h2 {
+  font-size: 1.15rem;
+  margin: 0;
+}
+
+.algo__note {
+  margin: 0.35rem 0 0;
+  max-width: 42rem;
+  color: var(--jw-text-muted);
+  font-size: 0.8125rem;
+}
+
+.algo__summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin: 0.75rem 0 1rem;
+  padding: 0;
+  list-style: none;
+  color: var(--jw-text-muted);
+  font-size: 0.8125rem;
+}
+
+.algo__summary strong {
+  color: var(--jw-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.algo__table-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.algo__scroll {
+  overflow-x: auto;
+}
+
+.algo__table {
+  width: 100%;
+  min-width: 62rem;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.algo__table th,
+.algo__table td {
+  padding: 0.4rem 0.55rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.algo__table th {
+  color: var(--jw-text-dim);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.algo__table tbody tr {
+  cursor: pointer;
+}
+
+.algo__table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.algo__row--selected {
+  background: rgba(0, 212, 255, 0.12);
+}
+
+.algo__symbol {
+  color: var(--jw-text);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.algo__up { color: var(--jw-green); }
+.algo__down { color: var(--jw-red); }

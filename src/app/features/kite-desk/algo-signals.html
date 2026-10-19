@@ -1,0 +1,73 @@
+<section class="jw-glass-card desk__panel algo" aria-labelledby="algo-signals-title">
+  <div class="algo__head">
+    <div>
+      <h2 id="algo-signals-title">High-volume breakout and retest setups</h2>
+      <p class="algo__note">Run Live places a real NSE CNC buy GTT on your Kite account. Quantity is 1, at the breakout candle low. The stoploss is not sent until that buy has executed.</p>
+    </div>
+    <button type="button" class="jw-btn jw-btn--primary" (click)="runLive()" [disabled]="store.running() || store.loading()">
+      {{ store.running() ? 'Running...' : 'Run Live' }}
+    </button>
+  </div>
+  @if (store.gttError(); as message) {
+    <p class="desk__alert" role="alert">{{ message }}</p>
+  }
+
+  @if (store.loading()) {
+    <p class="desk__status">Loading scanner cache...</p>
+  } @else if (store.error(); as message) {
+    <p class="desk__alert" role="alert">{{ message }}</p>
+  } @else {
+    <ul class="algo__summary">
+      <li><strong>{{ store.setups().length }}</strong> triggered breakouts</li>
+      <li><strong>{{ store.scanned() }}</strong> stocks scanned</li>
+      <li>{{ store.tickStatus() }}</li>
+    </ul>
+
+    <h3 class="algo__table-title">Triggered Breakouts</h3>
+    @if (store.setups().length === 0) {
+      <p class="desk__status">No breakout retest setups match the current parameters.</p>
+    } @else {
+      <div class="algo__scroll">
+        <table class="algo__table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Symbol</th>
+              <th>Current Price</th>
+              <th>Breakout Date</th>
+              <th>Age</th>
+              <th>Breakout Vol</th>
+              <th>Retest Distance</th>
+              <th>Peak Gains</th>
+              <th>Retracement</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of store.setups(); track row.symbol; let index = $index) {
+              <tr
+                [class.algo__row--selected]="selectedSymbol() === row.symbol"
+                [attr.aria-selected]="selectedSymbol() === row.symbol"
+                (click)="selectRow(row.symbol)">
+                <td>{{ index + 1 }}</td>
+                <td><strong class="algo__symbol">{{ row.symbol }}</strong></td>
+                <td>{{ displayPrice(row) | number:'1.2-2' }}</td>
+                <td>{{ row.breakoutDate }}</td>
+                <td>{{ row.daysSince }}</td>
+                <td>{{ multiple(row.volMultiple) }}</td>
+                <td [class.algo__up]="row.distanceFromMidpoint > 0" [class.algo__down]="row.distanceFromMidpoint < 0">
+                  {{ signedPercent(row.distanceFromMidpoint) }}
+                </td>
+                <td [class.algo__up]="row.returnFromCloseToSubHigh > 0" [class.algo__down]="row.returnFromCloseToSubHigh < 0">
+                  {{ signedPercent(row.returnFromCloseToSubHigh) }}
+                </td>
+                <td [class.algo__up]="row.retracementHigh > 0" [class.algo__down]="row.retracementHigh < 0">
+                  {{ signedPercent(row.retracementHigh) }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</section>
