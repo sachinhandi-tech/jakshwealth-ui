@@ -94,9 +94,17 @@
   font-weight: 600;
 }
 
+.kite-login__note {
+  margin: 0 0 1rem;
+  color: var(--jw-text-muted);
+}
+
 .kite-login__submit {
+  display: inline-flex;
   width: 100%;
   margin-top: 0.25rem;
+  text-decoration: none;
+  justify-content: center;
 }
 
 .kite-login__alert {

@@ -22,57 +22,20 @@
   }
 
   <div class="kite-login__layout">
-    <form class="kite-login__card jw-glass-card" (ngSubmit)="submit()">
+    <section class="kite-login__card jw-glass-card">
       <h2>Login</h2>
-
-      <label class="kite-login__field">
-        <span>API Key</span>
-        <input class="kite-login__input" name="apiKey" [(ngModel)]="apiKey" autocomplete="off" required />
-      </label>
-
-      <label class="kite-login__field">
-        <span>API Secret</span>
-        <span class="kite-login__secret">
-          <input
-            class="kite-login__input"
-            name="apiSecret"
-            [(ngModel)]="apiSecret"
-            [type]="showSecret ? 'text' : 'password'"
-            autocomplete="off"
-            required />
-          <button type="button" class="kite-login__reveal" (click)="showSecret = !showSecret">
-            {{ showSecret ? 'Hide' : 'Show' }}
-          </button>
-        </span>
-      </label>
-
-      <label class="kite-login__field">
-        <span>Request Token</span>
-        <input
-          class="kite-login__input"
-          name="requestToken"
-          [(ngModel)]="requestToken"
-          autocomplete="off"
-          placeholder="Paste the token or the full redirect URL"
-          required />
-      </label>
-
-      @if (error()) {
-        <p class="kite-login__alert" role="alert">{{ error() }}</p>
-      }
-
-      <button class="jw-btn jw-btn--primary kite-login__submit" type="submit" [disabled]="submitting()">
-        {{ submitting() ? 'Signing in…' : 'Login' }}
-      </button>
-    </form>
+      <p class="kite-login__note">
+        The API key and secret stay in AWS. Zerodha sends the request token to the callback.
+      </p>
+      <a class="jw-btn jw-btn--primary kite-login__submit" [href]="zerodhaLoginUrl">Sign in with Zerodha</a>
+    </section>
 
     <aside class="kite-login__steps jw-glass-card">
       <h2>Setup</h2>
       <ol>
         <li>The desk calls the deployed Kite Lambda. It does not use a server on this PC.</li>
-        <li>Open the Kite login link for your API key and sign in with the Zerodha client ID saved on the app.</li>
-        <li>Copy <code>request_token</code> from the redirect URL. It works only once.</li>
-        <li>Submit this form. The next screen is your dashboard.</li>
+        <li>Choose Sign in with Zerodha and sign in with the Zerodha client ID saved on the app.</li>
+        <li>Zerodha returns to the callback. The next screen is your dashboard.</li>
       </ol>
     </aside>
   </div>
