@@ -1,7 +1,9 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subscription, timer } from 'rxjs';
+import { switchMap, takeWhile } from 'rxjs/operators';
 
 import {
   KiteDeskTab,
@@ -21,7 +23,7 @@ import { KiteService } from './kite.service';
   styleUrl: './kite-dashboard.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class KiteDashboard {
+export class KiteDashboard implements OnDestroy {
   private readonly kite = inject(KiteService);
   private readonly router = inject(Router);
 
@@ -43,6 +45,8 @@ export class KiteDashboard {
   readonly scanLoading = signal<Record<SignalHorizon, boolean>>({ short: false, long: false });
   readonly scanError = signal<Record<SignalHorizon, string | null>>({ short: null, long: null });
   readonly scanResult = signal<Record<SignalHorizon, KiteSignalResult | null>>({ short: null, long: null });
+  private readonly scanPolls = new Map<SignalHorizon, Subscription>();
+
   readonly scans = {
     short: {
       shortType: 'ema' as MovingAverageType,
@@ -62,6 +66,12 @@ export class KiteDashboard {
 
   constructor() {
     this.loadProfile();
+  }
+
+  ngOnDestroy(): void {
+    for (const poll of this.scanPolls.values()) {
+      poll.unsubscribe();
+    }
   }
 
   selectTab(tab: KiteDeskTab): void {
@@ -128,23 +138,43 @@ export class KiteDashboard {
     if (!request) {
       return;
     }
+    this.scanPolls.get(kind)?.unsubscribe();
     this.scanLoading.update(current => ({ ...current, [kind]: true }));
     this.scanError.update(current => ({ ...current, [kind]: null }));
-    this.kite
-      .signals(request)
-      .subscribe({
-        next: result => {
-          this.scanResult.update(current => ({ ...current, [kind]: result }));
-          this.scanLoading.update(current => ({ ...current, [kind]: false }));
-        },
-        error: err => {
-          this.scanLoading.update(current => ({ ...current, [kind]: false }));
-          this.scanError.update(current => ({ ...current, [kind]: readError(err) }));
-          if (err?.status === 401) {
-            void this.router.navigate(['/kite/login']);
-          }
-        },
-      });
+    this.kite.startScan(request).subscribe({
+      next: job => {
+        const poll = timer(0, 2000).pipe(
+          switchMap(() => this.kite.signalJob(job.job_id)),
+          takeWhile(item => item.status === 'running', true),
+        ).subscribe({
+          next: item => {
+            if (item.status === 'running') {
+              return;
+            }
+            this.scanLoading.update(current => ({ ...current, [kind]: false }));
+            if (item.status === 'done' && item.result) {
+              this.scanResult.update(current => ({ ...current, [kind]: item.result }));
+              return;
+            }
+            this.scanError.update(current => ({
+              ...current,
+              [kind]: item.error || 'The scan could not be completed.',
+            }));
+          },
+          error: err => this.failScan(kind, err),
+        });
+        this.scanPolls.set(kind, poll);
+      },
+      error: err => this.failScan(kind, err),
+    });
+  }
+
+  private failScan(kind: SignalHorizon, err: { error?: { detail?: unknown }; status?: number }): void {
+    this.scanLoading.update(current => ({ ...current, [kind]: false }));
+    this.scanError.update(current => ({ ...current, [kind]: readError(err) }));
+    if (err?.status === 401) {
+      void this.router.navigate(['/kite/login']);
+    }
   }
 
   horizonName(kind: SignalHorizon): string {

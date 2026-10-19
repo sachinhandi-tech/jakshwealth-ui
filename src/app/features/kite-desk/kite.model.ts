@@ -53,6 +53,13 @@ export interface KiteSignal {
   trend_bias: 'above' | 'below' | null;
 }
 
+export interface KiteSignalJob {
+  job_id: string;
+  status: 'running' | 'done' | 'error';
+  result: KiteSignalResult | null;
+  error: string | null;
+}
+
 export interface KiteSignalResult {
   scan_mode: 'crossover' | 'price';
   ma_type: MovingAverageType;

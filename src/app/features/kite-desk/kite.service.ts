@@ -8,8 +8,8 @@ import {
   KiteProfile,
   KiteQuote,
   KiteSessionStatus,
+  KiteSignalJob,
   KiteSignalRequest,
-  KiteSignalResult,
 } from './kite.model';
 
 @Injectable({ providedIn: 'root' })
@@ -49,8 +49,14 @@ export class KiteService {
     });
   }
 
-  signals(body: KiteSignalRequest): Observable<KiteSignalResult> {
-    return this.http.post<KiteSignalResult>(`${KITE_API_BASE}/api/kite/signals`, body, {
+  startScan(body: KiteSignalRequest): Observable<{ job_id: string; status: string }> {
+    return this.http.post<{ job_id: string; status: string }>(`${KITE_API_BASE}/api/kite/signals`, body, {
+      headers: this.headers,
+    });
+  }
+
+  signalJob(jobId: string): Observable<KiteSignalJob> {
+    return this.http.get<KiteSignalJob>(`${KITE_API_BASE}/api/kite/signals/${jobId}`, {
       headers: this.headers,
     });
   }
