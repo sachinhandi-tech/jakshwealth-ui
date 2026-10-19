@@ -90,10 +90,23 @@ export interface UnivestAttempt {
   payload: UnivestSignal | null;
 }
 
+export interface UnivestOrder {
+  placed: boolean;
+  orders: {
+    exchange: string;
+    tradingsymbol: string;
+    transaction_type: 'BUY' | 'SELL';
+    quantity: number;
+    price: number;
+    order_id?: string | null;
+  }[];
+  error?: string | null;
+}
+
 export interface UnivestParseResponse {
   accepted: boolean;
   error?: string | null;
-  payload: UnivestSignal | null;
+  payload: (UnivestSignal & { order?: UnivestOrder }) | null;
   dispatched: boolean;
   dispatch_error?: string | null;
 }
