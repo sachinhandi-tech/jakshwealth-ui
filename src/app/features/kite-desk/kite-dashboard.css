@@ -235,6 +235,23 @@
   border-top: none;
 }
 
+.desk__sort {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.25rem;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
 .desk__row em {
   color: var(--jw-text-dim);
   font-style: normal;

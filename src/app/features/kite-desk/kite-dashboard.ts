@@ -10,6 +10,7 @@ import {
   KiteDeskTabItem,
   KiteProfile,
   KiteQuote,
+  KiteSignal,
   KiteSignalResult,
   MovingAverageType,
   SignalHorizon,
@@ -46,6 +47,8 @@ export class KiteDashboard implements OnDestroy {
   readonly scanError = signal<Record<SignalHorizon, string | null>>({ short: null, long: null });
   readonly scanResult = signal<Record<SignalHorizon, KiteSignalResult | null>>({ short: null, long: null });
   private readonly scanPolls = new Map<SignalHorizon, Subscription>();
+  readonly sortKey = signal<Record<SignalHorizon, SignalSortKey>>({ short: 'rank', long: 'rank' });
+  readonly sortDir = signal<Record<SignalHorizon, 'asc' | 'desc'>>({ short: 'asc', long: 'asc' });
 
   readonly scans = {
     short: {
@@ -139,6 +142,7 @@ export class KiteDashboard implements OnDestroy {
       return;
     }
     this.scanPolls.get(kind)?.unsubscribe();
+    this.scanResult.update(current => ({ ...current, [kind]: null }));
     this.scanLoading.update(current => ({ ...current, [kind]: true }));
     this.scanError.update(current => ({ ...current, [kind]: null }));
     this.kite.startScan(request).subscribe({
@@ -175,6 +179,47 @@ export class KiteDashboard implements OnDestroy {
     if (err?.status === 401) {
       void this.router.navigate(['/kite/login']);
     }
+  }
+
+  signalColumns(kind: SignalHorizon, result: KiteSignalResult): { key: SignalSortKey; label: string }[] {
+    const shared: { key: SignalSortKey; label: string }[] = [
+      { key: 'rank', label: 'Rank' },
+      { key: 'ticker', label: 'Ticker' },
+      { key: 'company', label: 'Company' },
+      { key: 'crossover_type', label: 'Crossover Type' },
+      { key: 'crossover_date', label: 'Crossover Date' },
+      { key: 'close', label: 'Close' },
+    ];
+    if (kind === 'short') {
+      return [
+        ...shared,
+        { key: 'short_sma', label: `${this.averageName(result.short_type)} ${result.short_window}` },
+        { key: 'long_sma', label: `${this.averageName(result.long_type)} ${result.long_window}` },
+        { key: 'trend_sma', label: `SMA ${result.trend_window}` },
+        { key: 'trend_bias', label: 'Long-term' },
+      ];
+    }
+    return [
+      ...shared,
+      { key: 'long_sma', label: `SMA ${result.long_window}` },
+      { key: 'trend_bias', label: 'Long-term' },
+    ];
+  }
+
+  toggleSort(kind: SignalHorizon, key: SignalSortKey): void {
+    if (this.sortKey()[kind] === key) {
+      this.sortDir.update(current => ({ ...current, [kind]: current[kind] === 'asc' ? 'desc' : 'asc' }));
+      return;
+    }
+    this.sortKey.update(current => ({ ...current, [kind]: key }));
+    this.sortDir.update(current => ({ ...current, [kind]: 'asc' }));
+  }
+
+  sortedSignals(kind: SignalHorizon): KiteSignal[] {
+    const rows = this.scanResult()[kind]?.signals ?? [];
+    const key = this.sortKey()[kind];
+    const direction = this.sortDir()[kind] === 'asc' ? 1 : -1;
+    return [...rows].sort((left, right) => compareSignals(left, right, key, direction));
   }
 
   horizonName(kind: SignalHorizon): string {
@@ -215,6 +260,33 @@ export class KiteDashboard implements OnDestroy {
       },
     });
   }
+}
+
+type SignalSortKey = 'rank' | 'ticker' | 'company' | 'crossover_type' | 'crossover_date' | 'close' | 'short_sma' | 'long_sma' | 'trend_sma' | 'trend_bias';
+
+function compareSignals(left: KiteSignal, right: KiteSignal, key: SignalSortKey, direction: number): number {
+  const leftValue = signalValue(left, key);
+  const rightValue = signalValue(right, key);
+  if (leftValue === null || rightValue === null) {
+    if (leftValue === rightValue) {
+      return left.ticker.localeCompare(right.ticker);
+    }
+    return leftValue === null ? 1 : -1;
+  }
+  const compared = typeof leftValue === 'number' && typeof rightValue === 'number'
+    ? leftValue - rightValue
+    : String(leftValue).localeCompare(String(rightValue));
+  if (compared === 0) {
+    return left.ticker.localeCompare(right.ticker);
+  }
+  return direction * compared;
+}
+
+function signalValue(row: KiteSignal, key: SignalSortKey): string | number | null {
+  if (key === 'crossover_date') {
+    return row.crossover_date;
+  }
+  return row[key];
 }
 
 function readError(err: { error?: { detail?: unknown }; status?: number }): string {

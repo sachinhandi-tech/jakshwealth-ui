@@ -198,68 +198,61 @@
             </p>
             @if (result.signals.length === 0) {
               <p class="desk__status">No crossovers in the last {{ result.lookback_days }} trading days.</p>
-            } @else if (kind === 'short') {
-              <div class="desk__scroll">
-                <div class="desk__table" role="table" aria-label="Short-term crossover signals">
-                  <div class="desk__row desk__row--signals desk__row--short desk__row--head" role="row">
-                    <span role="columnheader">Rank</span>
-                    <span role="columnheader">Ticker</span>
-                    <span role="columnheader">Company</span>
-                    <span role="columnheader">Crossover Type</span>
-                    <span role="columnheader">Crossover Date</span>
-                    <span role="columnheader">Close</span>
-                    <span role="columnheader">{{ averageName(result.short_type) }} {{ result.short_window }}</span>
-                    <span role="columnheader">{{ averageName(result.long_type) }} {{ result.long_window }}</span>
-                    <span role="columnheader">SMA {{ result.trend_window }}</span>
-                    <span role="columnheader">Long-term</span>
-                  </div>
-                  @for (row of result.signals; track row.ticker + row.crossover_date) {
-                    <div class="desk__row desk__row--signals desk__row--short" role="row">
-                      <span role="cell">{{ row.rank }}</span>
-                      <span role="cell"><strong>{{ row.ticker }}</strong></span>
-                      <span role="cell">{{ row.company }}</span>
-                      <span role="cell">
-                        <span class="desk__badge" [class.desk__badge--bull]="row.crossover_type === 'bullish'" [class.desk__badge--bear]="row.crossover_type === 'bearish'">
-                          {{ row.crossover_type === 'bullish' ? 'Bullish' : 'Bearish' }}
-                        </span>
-                      </span>
-                      <span role="cell">{{ row.crossover_date | date:'dd MMM yyyy' }}</span>
-                      <span role="cell">{{ row.close | number:'1.2-2' }}</span>
-                      <span role="cell">{{ row.short_sma | number:'1.2-2' }}</span>
-                      <span role="cell">{{ row.long_sma | number:'1.2-2' }}</span>
-                      <span role="cell">{{ row.trend_sma === null ? '—' : (row.trend_sma | number:'1.2-2') }}</span>
-                      <span role="cell">{{ row.trend_bias === 'above' ? 'Above' : row.trend_bias === 'below' ? 'Below' : '—' }}</span>
-                    </div>
-                  }
-                </div>
-              </div>
             } @else {
               <div class="desk__scroll">
-                <div class="desk__table" role="table" aria-label="Long-term SMA signals">
-                  <div class="desk__row desk__row--signals desk__row--head" role="row">
-                    <span role="columnheader">Rank</span>
-                    <span role="columnheader">Ticker</span>
-                    <span role="columnheader">Company</span>
-                    <span role="columnheader">Crossover Type</span>
-                    <span role="columnheader">Crossover Date</span>
-                    <span role="columnheader">Close</span>
-                    <span role="columnheader">SMA {{ result.long_window }}</span>
-                    <span role="columnheader">Long-term</span>
+                <div class="desk__table" role="table" [attr.aria-label]="kind === 'short' ? 'Short-term crossover signals' : 'Long-term SMA signals'">
+                  <div class="desk__row desk__row--signals desk__row--head" [class.desk__row--short]="kind === 'short'" role="row">
+                    @for (column of signalColumns(kind, result); track column.key) {
+                      <button
+                        type="button"
+                        class="desk__sort"
+                        role="columnheader"
+                        [attr.aria-sort]="sortKey()[kind] === column.key ? (sortDir()[kind] === 'asc' ? 'ascending' : 'descending') : 'none'"
+                        (click)="toggleSort(kind, column.key)">
+                        {{ column.label }}
+                        @if (sortKey()[kind] === column.key) {
+                          <span aria-hidden="true">{{ sortDir()[kind] === 'asc' ? '↑' : '↓' }}</span>
+                        }
+                      </button>
+                    }
                   </div>
-                  @for (row of result.signals; track row.ticker + row.crossover_date) {
-                    <div class="desk__row desk__row--signals" role="row">
-                      <span role="cell">{{ row.rank }}</span>
-                      <span role="cell"><strong>{{ row.ticker }}</strong></span>
-                      <span role="cell">{{ row.company }}</span>
-                      <span role="cell">
-                        <span class="desk__badge" [class.desk__badge--bull]="row.crossover_type === 'bullish'" [class.desk__badge--bear]="row.crossover_type === 'bearish'">
-                          {{ row.crossover_type === 'bullish' ? 'Bullish' : 'Bearish' }}
+                  @for (row of sortedSignals(kind); track row.ticker + row.crossover_date) {
+                    <div class="desk__row desk__row--signals" [class.desk__row--short]="kind === 'short'" role="row">
+                      @for (column of signalColumns(kind, result); track column.key) {
+                        <span role="cell">
+                          @switch (column.key) {
+                            @case ('ticker') {
+                              <strong>{{ row.ticker }}</strong>
+                            }
+                            @case ('crossover_type') {
+                              <span class="desk__badge" [class.desk__badge--bull]="row.crossover_type === 'bullish'" [class.desk__badge--bear]="row.crossover_type === 'bearish'">
+                                {{ row.crossover_type === 'bullish' ? 'Bullish' : 'Bearish' }}
+                              </span>
+                            }
+                            @case ('crossover_date') {
+                              {{ row.crossover_date | date:'dd MMM yyyy' }}
+                            }
+                            @case ('close') {
+                              {{ row.close | number:'1.2-2' }}
+                            }
+                            @case ('short_sma') {
+                              {{ row.short_sma | number:'1.2-2' }}
+                            }
+                            @case ('long_sma') {
+                              {{ row.long_sma | number:'1.2-2' }}
+                            }
+                            @case ('trend_sma') {
+                              {{ row.trend_sma === null ? '—' : (row.trend_sma | number:'1.2-2') }}
+                            }
+                            @case ('trend_bias') {
+                              {{ row.trend_bias === 'above' ? 'Above' : row.trend_bias === 'below' ? 'Below' : '—' }}
+                            }
+                            @default {
+                              {{ row.rank }}
+                            }
+                          }
                         </span>
-                      </span>
-                      <span role="cell">{{ row.crossover_date | date:'dd MMM yyyy' }}</span>
-                      <span role="cell">{{ row.close | number:'1.2-2' }}</span>
-                      <span role="cell">{{ row.long_sma | number:'1.2-2' }}</span>
-                      <span role="cell">{{ row.trend_bias === 'above' ? 'Above' : row.trend_bias === 'below' ? 'Below' : '—' }}</span>
+                      }
                     </div>
                   }
                 </div>
