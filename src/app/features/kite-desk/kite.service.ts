@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 
 import { KITE_API_BASE } from './kite.api';
 import {
@@ -10,8 +10,6 @@ import {
   KiteSessionStatus,
   KiteSignalRequest,
   KiteSignalResult,
-  UnivestAttempt,
-  UnivestParseResponse,
 } from './kite.model';
 
 @Injectable({ providedIn: 'root' })
@@ -49,20 +47,6 @@ export class KiteService {
     return this.http.get<KiteQuote[]>(`${KITE_API_BASE}/api/kite/quotes`, {
       headers: this.headers,
     });
-  }
-
-  univestAttempts(): Observable<UnivestAttempt[]> {
-    return this.http.get<{ attempts: UnivestAttempt[] }>(`${KITE_API_BASE}/api/kite/algo/signals`, {
-      headers: this.headers,
-    }).pipe(map(body => body.attempts ?? []));
-  }
-
-  parseUnivest(text: string): Observable<UnivestParseResponse> {
-    return this.http.post<UnivestParseResponse>(
-      `${KITE_API_BASE}/api/univest/notification`,
-      { text },
-      { headers: this.headers },
-    );
   }
 
   signals(body: KiteSignalRequest): Observable<KiteSignalResult> {

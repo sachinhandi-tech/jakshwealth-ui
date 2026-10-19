@@ -1,5 +1,5 @@
-import { DatePipe, DecimalPipe, JsonPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnDestroy, signal } from '@angular/core';
+import { DatePipe, DecimalPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -11,19 +11,17 @@ import {
   KiteSignalResult,
   MovingAverageType,
   SignalHorizon,
-  UnivestAttempt,
-  UnivestParseResponse,
 } from './kite.model';
 import { KiteService } from './kite.service';
 
 @Component({
   selector: 'app-kite-dashboard',
-  imports: [FormsModule, DatePipe, DecimalPipe, JsonPipe],
+  imports: [FormsModule, DatePipe, DecimalPipe],
   templateUrl: './kite-dashboard.html',
   styleUrl: './kite-dashboard.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class KiteDashboard implements OnDestroy {
+export class KiteDashboard {
   private readonly kite = inject(KiteService);
   private readonly router = inject(Router);
 
@@ -31,7 +29,6 @@ export class KiteDashboard implements OnDestroy {
     { id: 'user', label: 'User' },
     { id: 'market', label: 'Market' },
     { id: 'signals', label: 'Signals' },
-    { id: 'univest', label: 'Univest' },
   ];
 
   readonly activeTab = signal<KiteDeskTab>('user');
@@ -46,14 +43,6 @@ export class KiteDashboard implements OnDestroy {
   readonly scanLoading = signal<Record<SignalHorizon, boolean>>({ short: false, long: false });
   readonly scanError = signal<Record<SignalHorizon, string | null>>({ short: null, long: null });
   readonly scanResult = signal<Record<SignalHorizon, KiteSignalResult | null>>({ short: null, long: null });
-  readonly univestLoading = signal(false);
-  readonly univestError = signal<string | null>(null);
-  readonly univestResult = signal<UnivestParseResponse | null>(null);
-  readonly univestAttempts = signal<UnivestAttempt[]>([]);
-
-  univestText = '';
-  private univestTimer: ReturnType<typeof setInterval> | null = null;
-
   readonly scans = {
     short: {
       shortType: 'ema' as MovingAverageType,
@@ -75,21 +64,11 @@ export class KiteDashboard implements OnDestroy {
     this.loadProfile();
   }
 
-  ngOnDestroy(): void {
-    this.stopUnivestPoll();
-  }
-
   selectTab(tab: KiteDeskTab): void {
     this.activeTab.set(tab);
     if (tab === 'market' && this.quotes().length === 0 && !this.quotesLoading()) {
       this.loadQuotes();
     }
-    if (tab === 'univest') {
-      this.refreshUnivest();
-      this.univestTimer ??= setInterval(() => this.refreshUnivest(), 4000);
-      return;
-    }
-    this.stopUnivestPoll();
   }
 
   loadQuotes(): void {
@@ -166,42 +145,6 @@ export class KiteDashboard implements OnDestroy {
           }
         },
       });
-  }
-
-  refreshUnivest(): void {
-    this.kite.univestAttempts().subscribe({
-      next: rows => this.univestAttempts.set(rows),
-    });
-  }
-
-  parseUnivest(): void {
-    const text = this.univestText.trim();
-    if (!text) {
-      this.univestError.set('Paste a Univest notification first.');
-      return;
-    }
-    this.univestLoading.set(true);
-    this.univestError.set(null);
-    this.kite.parseUnivest(text).subscribe({
-      next: result => {
-        this.univestResult.set(result);
-        this.univestLoading.set(false);
-        if (!result.accepted) {
-          this.univestError.set(result.error || 'That notification could not be parsed.');
-        }
-      },
-      error: err => {
-        this.univestLoading.set(false);
-        this.univestError.set(readError(err));
-      },
-    });
-  }
-
-  private stopUnivestPoll(): void {
-    if (this.univestTimer !== null) {
-      clearInterval(this.univestTimer);
-      this.univestTimer = null;
-    }
   }
 
   horizonName(kind: SignalHorizon): string {

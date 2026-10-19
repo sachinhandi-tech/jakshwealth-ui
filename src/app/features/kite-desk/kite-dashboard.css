@@ -174,69 +174,6 @@
   font-weight: 500;
 }
 
-.desk__field--wide {
-  grid-column: 1 / -1;
-  text-transform: none;
-  letter-spacing: 0;
-  font-size: 0.8125rem;
-}
-
-.desk__univest {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.desk__textarea {
-  min-height: 8rem;
-  resize: vertical;
-  font-family: var(--font-mono);
-}
-
-.desk__subhead {
-  margin: 1.25rem 0 0.5rem;
-  font-size: 0.95rem;
-}
-
-.desk__attempts {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.desk__attempt {
-  padding: 0.75rem 0.9rem;
-  border-radius: var(--radius-md);
-  background: rgba(0, 0, 0, 0.22);
-}
-
-.desk__attempt-head {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.35rem;
-}
-
-.desk__preview {
-  margin: 0.35rem 0 0;
-  color: var(--jw-text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  white-space: pre-wrap;
-}
-
-.desk__json {
-  margin: 1rem 0 0;
-  padding: 1rem;
-  overflow-x: auto;
-  border-radius: var(--radius-md);
-  background: rgba(0, 0, 0, 0.28);
-  color: var(--jw-text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
-}
-
 .desk__input:focus {
   outline: none;
   border-color: var(--jw-cyan);

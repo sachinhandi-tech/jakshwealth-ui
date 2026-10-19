@@ -68,50 +68,7 @@ export interface KiteSignalResult {
   signals: KiteSignal[];
 }
 
-export interface UnivestSignal {
-  symbol: string;
-  transaction_type: 'BUY' | 'SELL';
-  entry_price: number;
-  stop_loss: number | null;
-  target: number | null;
-  source: 'univest';
-  product?: 'CNC' | 'MIS' | 'NRML' | null;
-  targets?: number[];
-  signal_kind?: 'entry' | 'partial_book' | 'exit';
-  entry_low?: number;
-  entry_high?: number;
-}
-
-export interface UnivestAttempt {
-  received_at: string;
-  accepted: boolean;
-  error: string | null;
-  preview: string;
-  payload: UnivestSignal | null;
-}
-
-export interface UnivestOrder {
-  placed: boolean;
-  orders: {
-    exchange: string;
-    tradingsymbol: string;
-    transaction_type: 'BUY' | 'SELL';
-    quantity: number;
-    price: number;
-    order_id?: string | null;
-  }[];
-  error?: string | null;
-}
-
-export interface UnivestParseResponse {
-  accepted: boolean;
-  error?: string | null;
-  payload: (UnivestSignal & { order?: UnivestOrder }) | null;
-  dispatched: boolean;
-  dispatch_error?: string | null;
-}
-
-export type KiteDeskTab = 'user' | 'market' | 'signals' | 'univest';
+export type KiteDeskTab = 'user' | 'market' | 'signals';
 
 export interface KiteDeskTabItem {
   id: KiteDeskTab;
