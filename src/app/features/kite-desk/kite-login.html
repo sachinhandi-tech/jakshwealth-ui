@@ -3,14 +3,13 @@
     <span class="kite-login__eyebrow">Zerodha Kite Connect</span>
     <h1>Sign in once. <span class="jw-gradient-text">Trade from the desk.</span></h1>
     <p>
-      The login creates an access token on the Kite Lambda and stores it there.
-      The browser never receives that token.
+      The login stores the access token encrypted on the Kite service. The browser does not receive it.
     </p>
   </section>
 
   @if (backendOffline()) {
     <p class="kite-login__alert" role="alert">
-      The Kite Lambda did not respond. Rebuild the jakshwealth-api Jenkins job so <code>jw_kite</code> is deployed, then try again.
+      The Kite service did not respond. Publish the EC2 API bundle, then try again.
     </p>
   }
 
@@ -25,9 +24,22 @@
     <section class="kite-login__card jw-glass-card">
       <h2>Login</h2>
       <p class="kite-login__note">
-        The API key and secret stay in AWS. Zerodha sends the request token to the callback.
+        The API key and secret stay in AWS. Sign-in is available on weekdays from 9:00 AM to 4:00 PM IST.
       </p>
-      <a class="jw-btn jw-btn--primary kite-login__submit" [href]="zerodhaLoginUrl">Sign in with Zerodha</a>
+      @if (subscribers().length > 1) {
+        <label class="kite-login__note" for="platform-user">Subscriber</label>
+        <select id="platform-user" [value]="selectedId()" (change)="choose($any($event.target).value)">
+          <option value="">Choose the platform user</option>
+          @for (subscriber of subscribers(); track subscriber.platform_user_id) {
+            <option [value]="subscriber.platform_user_id">{{ subscriber.email }}</option>
+          }
+        </select>
+      }
+      @if (selectedId()) {
+        <a class="jw-btn jw-btn--primary kite-login__submit" [href]="zerodhaLoginUrl()">Sign in with Zerodha</a>
+      } @else {
+        <p class="kite-login__note">An active platform user is required before Zerodha sign-in.</p>
+      }
     </section>
 
     <aside class="kite-login__steps jw-glass-card">

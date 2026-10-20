@@ -2,12 +2,18 @@ export interface KiteSessionStatus {
   authenticated: boolean;
   user_name: string | null;
   user_id: string | null;
+  platform_user_id?: string | null;
+}
+
+export interface KiteSubscriber {
+  platform_user_id: string;
+  email: string;
 }
 
 export interface KiteLoginRequest {
   api_key: string;
-  api_secret: string;
   request_token: string;
+  platform_user_id?: string;
 }
 
 export interface KiteProfile {

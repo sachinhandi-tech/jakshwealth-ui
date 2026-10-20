@@ -33,10 +33,13 @@ export class AlgoDeskStore implements OnDestroy {
   private readonly kite = inject(KiteService);
   private socket: WebSocket | null = null;
   private loaded = false;
+  private stopped = false;
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly scanned = signal(0);
+  readonly universe = signal(0);
+  readonly filling = signal(false);
   readonly setups = signal<BreakoutSetup[]>([]);
   readonly tickStatus = signal('Connecting to live ticks…');
   readonly running = signal(false);
@@ -59,6 +62,7 @@ export class AlgoDeskStore implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.stopped = true;
     this.closeTicks();
   }
 
@@ -101,36 +105,56 @@ export class AlgoDeskStore implements OnDestroy {
   private reload(): Promise<void> {
     this.loading.set(true);
     this.error.set(null);
-    return new Promise(resolve => {
-      this.kite.scannerData().subscribe({
-        next: payload => {
-          try {
-            const result = scanBreakouts(readStocks(payload));
-            const symbols = new Set(result.setups.map(setup => setup.symbol));
-            this.gttResults.update(current => {
-              const next = new Map(current);
-              for (const symbol of next.keys()) {
-                if (!symbols.has(symbol)) {
-                  next.delete(symbol);
-                }
+    this.filling.set(false);
+    return new Promise(resolve => this.pullScanner(resolve, 0));
+  }
+
+  private pullScanner(done: () => void, pages: number): void {
+    if (this.stopped) {
+      done();
+      return;
+    }
+    this.kite.scannerData().subscribe({
+      next: payload => {
+        if (this.stopped) {
+          done();
+          return;
+        }
+        try {
+          const result = scanBreakouts(readStocks(payload));
+          const meta = scannerMeta(payload);
+          const symbols = new Set(result.setups.map(setup => setup.symbol));
+          this.gttResults.update(current => {
+            const next = new Map(current);
+            for (const symbol of next.keys()) {
+              if (!symbols.has(symbol)) {
+                next.delete(symbol);
               }
-              return next;
-            });
-            this.scanned.set(result.scanned);
-            this.setups.set(result.setups);
-            this.loaded = true;
-            this.connectTicks(result.setups);
-            this.refreshSnapshot(resolve);
-          } catch (err) {
-            this.failLoad(err);
-            resolve();
+            }
+            return next;
+          });
+          this.scanned.set(meta.scanned ?? result.scanned);
+          this.universe.set(meta.universe ?? this.scanned());
+          this.setups.set(result.setups);
+          this.loaded = true;
+          this.loading.set(false);
+          this.connectTicks(result.setups);
+          const stillFilling = meta.complete === false && pages < 500;
+          this.filling.set(stillFilling);
+          if (stillFilling) {
+            this.pullScanner(done, pages + 1);
+            return;
           }
-        },
-        error: err => {
+          this.refreshSnapshot(done);
+        } catch (err) {
           this.failLoad(err);
-          resolve();
-        },
-      });
+          done();
+        }
+      },
+      error: err => {
+        this.failLoad(err);
+        done();
+      },
     });
   }
 
@@ -143,23 +167,31 @@ export class AlgoDeskStore implements OnDestroy {
       done();
       return;
     }
-    this.kite.ohlcSnapshot(symbols).subscribe({
-      next: snapshot => {
-        const prices = new Map<string, number>();
-        for (const quote of snapshot.quotes ?? []) {
-          if (typeof quote.last_price === 'number' && Number.isFinite(quote.last_price)) {
-            prices.set(quote.symbol, quote.last_price);
-          }
-        }
+    const prices = new Map<string, number>();
+    const chunks: string[][] = [];
+    for (let index = 0; index < symbols.length; index += 200) {
+      chunks.push(symbols.slice(index, index + 200));
+    }
+    const next = (index: number) => {
+      if (index >= chunks.length) {
         this.snapshotPrices.set(prices);
         this.loading.set(false);
         done();
-      },
-      error: () => {
-        this.loading.set(false);
-        done();
-      },
-    });
+        return;
+      }
+      this.kite.ohlcSnapshot(chunks[index]).subscribe({
+        next: snapshot => {
+          for (const quote of snapshot.quotes ?? []) {
+            if (typeof quote.last_price === 'number' && Number.isFinite(quote.last_price)) {
+              prices.set(quote.symbol, quote.last_price);
+            }
+          }
+          next(index + 1);
+        },
+        error: () => next(index + 1),
+      });
+    };
+    next(0);
   }
 
   private failLoad(err: unknown): void {
@@ -327,6 +359,22 @@ function toRequest(order: GttOrderResult): GttOrderRequest {
     buy_price: order.buy_price,
     stoploss: order.stoploss,
     last_price: order.last_price,
+  };
+}
+
+function scannerMeta(payload: unknown): { scanned?: number; universe?: number; complete?: boolean } {
+  if (!payload || typeof payload !== 'object') {
+    return {};
+  }
+  const metadata = (payload as { metadata?: unknown }).metadata;
+  if (!metadata || typeof metadata !== 'object') {
+    return {};
+  }
+  const row = metadata as { scanned?: unknown; universe?: unknown; complete?: unknown };
+  return {
+    scanned: typeof row.scanned === 'number' ? row.scanned : undefined,
+    universe: typeof row.universe === 'number' ? row.universe : undefined,
+    complete: typeof row.complete === 'boolean' ? row.complete : undefined,
   };
 }
 
