@@ -39,7 +39,9 @@
       @if (subscriberError()) {
         <p class="kite-login__note">Accounts could not be loaded. Try again in a moment.</p>
       }
-      @if (selectedId()) {
+      @if (!accountsReady() && !selectedId()) {
+        <p class="kite-login__note">Loading your account…</p>
+      } @else if (selectedId() || subscribers().length === 0) {
         <a class="jw-btn jw-btn--primary kite-login__submit" [href]="zerodhaLoginUrl()">Sign in with Zerodha</a>
       } @else {
         <p class="kite-login__note">Choose an account to continue.</p>

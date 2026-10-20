@@ -19,6 +19,7 @@ export class KiteLogin {
   readonly backendOffline = signal(false);
   readonly subscribers = signal<KiteSubscriber[]>([]);
   readonly subscriberError = signal(false);
+  readonly accountsReady = signal(false);
   readonly selectedId = signal<string | null>(currentPlatformUserId());
   readonly zerodhaLoginUrl = computed(() => {
     const id = this.selectedId();
@@ -31,11 +32,15 @@ export class KiteLogin {
       next: body => {
         const rows = body.subscribers ?? [];
         this.subscribers.set(rows);
+        this.accountsReady.set(true);
         if (!this.selectedId() && rows.length === 1) {
           this.choose(rows[0].platform_user_id);
         }
       },
-      error: () => this.subscriberError.set(true),
+      error: () => {
+        this.subscriberError.set(true);
+        this.accountsReady.set(true);
+      },
     });
     this.kite.session().subscribe({
       next: status => {
