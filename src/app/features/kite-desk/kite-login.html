@@ -1,56 +1,57 @@
 <div class="kite-login jw-page">
   <section class="kite-login__intro">
-    <span class="kite-login__eyebrow">Zerodha Kite Connect</span>
-    <h1>Sign in once. <span class="jw-gradient-text">Trade from the desk.</span></h1>
+    <span class="kite-login__eyebrow">JakshWealth</span>
+    <h1>Your market desk. <span class="jw-gradient-text">Open any day.</span></h1>
     <p>
-      The login stores the access token encrypted on the Kite service. The browser does not receive it.
+      Review quotes, scan breakout and moving-average setups, and follow your book from one screen.
+      Algo orders run only on weekdays from 9:00 AM to 4:00 PM IST.
     </p>
   </section>
 
   @if (backendOffline()) {
     <p class="kite-login__alert" role="alert">
-      The Kite service did not respond. Publish the EC2 API bundle, then try again.
+      The desk is unavailable right now. Try again in a moment.
     </p>
   }
 
   @if (existingUser()) {
     <div class="kite-login__resume jw-glass-card">
-      <p>A saved session is already on the server for <strong>{{ existingUser() }}</strong>.</p>
+      <p>You are already signed in as <strong>{{ existingUser() }}</strong>.</p>
       <a class="jw-btn jw-btn--primary" routerLink="/kite/dashboard">Continue to dashboard</a>
     </div>
   }
 
   <div class="kite-login__layout">
     <section class="kite-login__card jw-glass-card">
-      <h2>Login</h2>
+      <h2>Sign in</h2>
       <p class="kite-login__note">
-        The API key and secret stay in AWS. Sign-in is available on weekdays from 9:00 AM to 4:00 PM IST.
+        The desk is available every day. Sign in to open your dashboard.
       </p>
       @if (subscribers().length > 1) {
-        <label class="kite-login__note" for="platform-user">Subscriber</label>
+        <label class="kite-login__note" for="platform-user">Account</label>
         <select id="platform-user" [value]="selectedId()" (change)="choose($any($event.target).value)">
-          <option value="">Choose the platform user</option>
+          <option value="">Choose an account</option>
           @for (subscriber of subscribers(); track subscriber.platform_user_id) {
             <option [value]="subscriber.platform_user_id">{{ subscriber.email }}</option>
           }
         </select>
       }
       @if (subscriberError()) {
-        <p class="kite-login__note">The subscriber list could not be loaded from the identity database.</p>
+        <p class="kite-login__note">Accounts could not be loaded. Try again in a moment.</p>
       }
       @if (selectedId()) {
         <a class="jw-btn jw-btn--primary kite-login__submit" [href]="zerodhaLoginUrl()">Sign in with Zerodha</a>
       } @else {
-        <p class="kite-login__note">An active platform user is required before Zerodha sign-in.</p>
+        <p class="kite-login__note">Choose an account to continue.</p>
       }
     </section>
 
     <aside class="kite-login__steps jw-glass-card">
-      <h2>Setup</h2>
+      <h2>On the desk</h2>
       <ol>
-        <li>The desk calls the deployed Kite Lambda. It does not use a server on this PC.</li>
-        <li>Choose Sign in with Zerodha and sign in with the Zerodha client ID saved on the app.</li>
-        <li>Zerodha returns to the callback. The next screen is your dashboard.</li>
+        <li>See quotes and your account.</li>
+        <li>Scan breakout, retest, and moving-average setups.</li>
+        <li>Place algo orders only on weekdays from 9:00 AM to 4:00 PM IST.</li>
       </ol>
     </aside>
   </div>

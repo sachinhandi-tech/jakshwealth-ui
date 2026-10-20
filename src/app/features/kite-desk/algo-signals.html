@@ -2,7 +2,7 @@
   <div class="algo__head">
     <div>
       <h2 id="algo-signals-title">High-volume breakout and retest setups</h2>
-      <p class="algo__note">Run Live places a real NSE CNC buy GTT on your Kite account. Quantity is 1, at the breakout candle low. The stoploss is not sent until that buy has executed.</p>
+      <p class="algo__note">Run Live places a real NSE CNC buy GTT. Quantity is 1, at the breakout candle low. The stoploss is not sent until that buy has executed. Algo orders run only on weekdays from 9:00 AM to 4:00 PM IST.</p>
     </div>
     <button type="button" class="jw-btn jw-btn--primary" (click)="runLive()" [disabled]="store.running() || store.loading()">
       {{ store.running() ? 'Running...' : 'Run Live' }}
