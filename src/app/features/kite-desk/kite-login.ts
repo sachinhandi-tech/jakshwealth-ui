@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
-import { currentKiteApiBase, currentPlatformUserId, rememberPlatformUserId } from './kite.api';
+import { currentKiteApiBase, currentPlatformUserId, forgetPlatformUserId, rememberPlatformUserId } from './kite.api';
 import { KiteSubscriber } from './kite.model';
 import { KiteService } from './kite.service';
 
@@ -33,7 +33,11 @@ export class KiteLogin {
         const rows = body.subscribers ?? [];
         this.subscribers.set(rows);
         this.accountsReady.set(true);
-        if (!this.selectedId() && rows.length === 1) {
+        const known = new Set(rows.map(row => row.platform_user_id));
+        const current = this.selectedId();
+        if (current && !known.has(current)) {
+          this.clearAccount();
+        } else if (!current && rows.length === 1) {
           this.choose(rows[0].platform_user_id);
         }
       },
@@ -45,7 +49,7 @@ export class KiteLogin {
     this.kite.session().subscribe({
       next: status => {
         this.backendOffline.set(false);
-        if (status.platform_user_id) {
+        if (status.platform_user_id && this.subscribers().some(row => row.platform_user_id === status.platform_user_id)) {
           this.choose(status.platform_user_id);
         }
         if (status.authenticated) {
@@ -59,5 +63,10 @@ export class KiteLogin {
   choose(platformUserId: string): void {
     rememberPlatformUserId(platformUserId);
     this.selectedId.set(platformUserId);
+  }
+
+  clearAccount(): void {
+    forgetPlatformUserId();
+    this.selectedId.set(null);
   }
 }

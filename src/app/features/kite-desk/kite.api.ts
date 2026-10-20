@@ -29,6 +29,10 @@ export function rememberPlatformUserId(value: string): void {
   window.sessionStorage.setItem(PLATFORM_USER_KEY, value);
 }
 
+export function forgetPlatformUserId(): void {
+  window.sessionStorage.removeItem(PLATFORM_USER_KEY);
+}
+
 export async function loadPublishedKiteApiBase(): Promise<void> {
   try {
     const response = await fetch('/kite-api-base.json', { cache: 'no-store' });
