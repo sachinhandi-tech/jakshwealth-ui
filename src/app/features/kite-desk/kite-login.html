@@ -35,6 +35,9 @@
           }
         </select>
       }
+      @if (subscriberError()) {
+        <p class="kite-login__note">The subscriber list could not be loaded from the identity database.</p>
+      }
       @if (selectedId()) {
         <a class="jw-btn jw-btn--primary kite-login__submit" [href]="zerodhaLoginUrl()">Sign in with Zerodha</a>
       } @else {
