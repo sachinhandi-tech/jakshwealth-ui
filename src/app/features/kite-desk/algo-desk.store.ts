@@ -1,5 +1,5 @@
 import { computed, Injectable, inject, OnDestroy, signal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 
 import { BreakoutSetup, readStocks, scanBreakouts } from './algo-scanner';
 import {
@@ -32,8 +32,10 @@ const blockedStates = new Set(['blocked', 'already_active', 'position_exists', '
 export class AlgoDeskStore implements OnDestroy {
   private readonly kite = inject(KiteService);
   private socket: WebSocket | null = null;
+  private scanSub: Subscription | null = null;
   private loaded = false;
   private stopped = false;
+  private fillCancelled = false;
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -63,7 +65,16 @@ export class AlgoDeskStore implements OnDestroy {
 
   ngOnDestroy(): void {
     this.stopped = true;
+    this.stopFill();
     this.closeTicks();
+  }
+
+  stopFill(): void {
+    this.fillCancelled = true;
+    this.filling.set(false);
+    this.loading.set(false);
+    this.scanSub?.unsubscribe();
+    this.scanSub = null;
   }
 
   async runLive(): Promise<void> {
@@ -103,6 +114,7 @@ export class AlgoDeskStore implements OnDestroy {
   }
 
   private reload(): Promise<void> {
+    this.fillCancelled = false;
     this.loading.set(true);
     this.error.set(null);
     this.filling.set(false);
@@ -110,13 +122,17 @@ export class AlgoDeskStore implements OnDestroy {
   }
 
   private pullScanner(done: () => void, pages: number): void {
-    if (this.stopped) {
+    if (this.stopped || this.fillCancelled) {
+      this.filling.set(false);
+      this.loading.set(false);
       done();
       return;
     }
-    this.kite.scannerData().subscribe({
+    this.scanSub?.unsubscribe();
+    this.scanSub = this.kite.scannerData().subscribe({
       next: payload => {
-        if (this.stopped) {
+        if (this.stopped || this.fillCancelled) {
+          this.filling.set(false);
           done();
           return;
         }

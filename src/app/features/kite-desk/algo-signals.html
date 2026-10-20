@@ -19,9 +19,12 @@
   } @else {
     <ul class="algo__summary">
       <li><strong>{{ store.setups().length }}</strong> triggered breakouts</li>
-      <li><strong>{{ store.scanned() }}</strong> of <strong>{{ store.universe() || store.scanned() }}</strong> NSE stocks scanned</li>
+      <li><strong>{{ store.scanned() }}</strong> of <strong>{{ store.universe() || store.scanned() }}</strong> NSE equity symbols scanned</li>
       @if (store.filling()) {
-        <li>Scan still filling. This page keeps requesting the rest of the NSE.</li>
+        <li>
+          Scan still filling.
+          <button type="button" class="jw-btn jw-btn--ghost" (click)="store.stopFill()">Stop scan</button>
+        </li>
       }
       <li>{{ store.tickStatus() }}</li>
     </ul>
