@@ -1,5 +1,5 @@
-/** Fallback while kite-api-base.json is absent. The desk replaces this after the EC2 API publishes that file. */
-export const KITE_API_BASE = 'https://4jadhr4hk8.execute-api.ap-south-2.amazonaws.com/dev/jw-api/kite';
+/** Fallback while kite-api-base.json is absent. Points to local dev. The desk replaces this after the EC2 API publishes that file. */
+export const KITE_API_BASE = 'http://127.0.0.1:8010/api/kite';
 
 let activeKiteApiBase = KITE_API_BASE;
 
