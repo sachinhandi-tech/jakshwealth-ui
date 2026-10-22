@@ -77,14 +77,14 @@ export class KiteService {
   }
 
   scannerData(): Observable<unknown> {
-    return this.http.get<unknown>(`${currentKiteApiBase()}/api/scanner-data`, {
+    return this.http.get<unknown>(`${currentKiteApiBase()}/scanner-data`, {
       headers: this.deskHeaders(),
     });
   }
 
   ohlcSnapshot(symbols: string[]): Observable<OhlcSnapshot> {
     const query = encodeURIComponent(symbols.join(','));
-    return this.http.get<OhlcSnapshot>(`${currentKiteApiBase()}/api/ohlc?symbols=${query}`, {
+    return this.http.get<OhlcSnapshot>(`${currentKiteApiBase()}/ohlc?symbols=${query}`, {
       headers: this.deskHeaders(),
     });
   }
@@ -98,13 +98,13 @@ export class KiteService {
   }
 
   gttState(orders: GttOrderRequest[]): Observable<GttOrderResponse> {
-    return this.http.post<GttOrderResponse>(`${currentKiteApiBase()}/api/algo-orders/gtt-state`, { orders }, {
+    return this.http.post<GttOrderResponse>(`${currentKiteApiBase()}/algo-orders/gtt-state`, { orders }, {
       headers: this.deskHeaders(),
     });
   }
 
   liveGtt(orders: GttOrderRequest[]): Observable<GttOrderResponse> {
-    return this.http.post<GttOrderResponse>(`${currentKiteApiBase()}/api/algo-orders/live-gtt`, {
+    return this.http.post<GttOrderResponse>(`${currentKiteApiBase()}/algo-orders/live-gtt`, {
       confirm_live: true,
       orders,
     }, {
