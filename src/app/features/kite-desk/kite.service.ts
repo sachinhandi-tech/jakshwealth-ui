@@ -77,34 +77,39 @@ export class KiteService {
   }
 
   scannerData(): Observable<unknown> {
-    return this.http.get<unknown>(`${currentKiteApiBase()}/scanner-data`, {
+    const apiBase = currentKiteApiBase().replace(/\/kite$/, '');
+    return this.http.get<unknown>(`${apiBase}/scanner-data`, {
       headers: this.deskHeaders(),
     });
   }
 
   ohlcSnapshot(symbols: string[]): Observable<OhlcSnapshot> {
     const query = encodeURIComponent(symbols.join(','));
-    return this.http.get<OhlcSnapshot>(`${currentKiteApiBase()}/ohlc?symbols=${query}`, {
+    const apiBase = currentKiteApiBase().replace(/\/kite$/, '');
+    return this.http.get<OhlcSnapshot>(`${apiBase}/ohlc?symbols=${query}`, {
       headers: this.deskHeaders(),
     });
   }
 
   openTicks(tokens: number[]): WebSocket {
-    const base = currentKiteApiBase().replace(/^http/i, 'ws');
+    const httpBase = currentKiteApiBase().replace(/\/kite$/, '');
+    const wsBase = httpBase.replace(/^http/i, 'ws');
     const query = tokens.join(',');
     const user = currentPlatformUserId();
     const userQuery = user ? `&platform_user_id=${encodeURIComponent(user)}` : '';
-    return new WebSocket(`${base}/ws/ticks?tokens=${query}&mode=full${userQuery}`);
+    return new WebSocket(`${wsBase}/ws/ticks?tokens=${query}&mode=full${userQuery}`);
   }
 
   gttState(orders: GttOrderRequest[]): Observable<GttOrderResponse> {
-    return this.http.post<GttOrderResponse>(`${currentKiteApiBase()}/algo-orders/gtt-state`, { orders }, {
+    const apiBase = currentKiteApiBase().replace(/\/kite$/, '');
+    return this.http.post<GttOrderResponse>(`${apiBase}/algo-orders/gtt-state`, { orders }, {
       headers: this.deskHeaders(),
     });
   }
 
   liveGtt(orders: GttOrderRequest[]): Observable<GttOrderResponse> {
-    return this.http.post<GttOrderResponse>(`${currentKiteApiBase()}/algo-orders/live-gtt`, {
+    const apiBase = currentKiteApiBase().replace(/\/kite$/, '');
+    return this.http.post<GttOrderResponse>(`${apiBase}/algo-orders/live-gtt`, {
       confirm_live: true,
       orders,
     }, {
