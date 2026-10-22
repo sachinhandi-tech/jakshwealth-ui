@@ -23,7 +23,7 @@ export class KiteLogin {
   readonly selectedId = signal<string | null>(currentPlatformUserId());
   readonly zerodhaLoginUrl = computed(() => {
     const id = this.selectedId();
-    const base = `${currentKiteApiBase()}/login`;
+    const base = `https://${new URL(currentKiteApiBase()).hostname}/jw-api/auth/zerodha/login`;
     return id ? `${base}?platform_user_id=${encodeURIComponent(id)}` : base;
   });
 
