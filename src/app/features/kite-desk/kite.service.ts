@@ -27,51 +27,51 @@ export class KiteService {
   }
 
   session(): Observable<KiteSessionStatus> {
-    return this.http.get<KiteSessionStatus>(`${currentKiteApiBase()}/api/kite/session`, {
+    return this.http.get<KiteSessionStatus>(`${currentKiteApiBase()}/session`, {
       headers: this.deskHeaders(),
     });
   }
 
   subscribers(): Observable<{ subscribers: KiteSubscriber[] }> {
-    return this.http.get<{ subscribers: KiteSubscriber[] }>(`${currentKiteApiBase()}/api/kite/subscribers`, {
+    return this.http.get<{ subscribers: KiteSubscriber[] }>(`${currentKiteApiBase()}/subscribers`, {
       headers: this.deskHeaders(),
     });
   }
 
   login(body: KiteLoginRequest): Observable<KiteSessionStatus> {
-    return this.http.post<KiteSessionStatus>(`${currentKiteApiBase()}/api/kite/login`, body, {
+    return this.http.post<KiteSessionStatus>(`${currentKiteApiBase()}/login`, body, {
       headers: this.deskHeaders(),
     });
   }
 
   logout(): Observable<KiteSessionStatus> {
     return this.http.post<KiteSessionStatus>(
-      `${currentKiteApiBase()}/api/kite/logout`,
+      `${currentKiteApiBase()}/logout`,
       {},
       { headers: this.deskHeaders() },
     );
   }
 
   profile(): Observable<KiteProfile> {
-    return this.http.get<KiteProfile>(`${currentKiteApiBase()}/api/kite/profile`, {
+    return this.http.get<KiteProfile>(`${currentKiteApiBase()}/profile`, {
       headers: this.deskHeaders(),
     });
   }
 
   quotes(): Observable<KiteQuote[]> {
-    return this.http.get<KiteQuote[]>(`${currentKiteApiBase()}/api/kite/quotes`, {
+    return this.http.get<KiteQuote[]>(`${currentKiteApiBase()}/quotes`, {
       headers: this.deskHeaders(),
     });
   }
 
   startScan(body: KiteSignalRequest): Observable<{ job_id: string; status: string }> {
-    return this.http.post<{ job_id: string; status: string }>(`${currentKiteApiBase()}/api/kite/signals`, body, {
+    return this.http.post<{ job_id: string; status: string }>(`${currentKiteApiBase()}/signals`, body, {
       headers: this.deskHeaders(),
     });
   }
 
   signalJob(jobId: string): Observable<KiteSignalJob> {
-    return this.http.get<KiteSignalJob>(`${currentKiteApiBase()}/api/kite/signals/${jobId}`, {
+    return this.http.get<KiteSignalJob>(`${currentKiteApiBase()}/signals/${jobId}`, {
       headers: this.deskHeaders(),
     });
   }
