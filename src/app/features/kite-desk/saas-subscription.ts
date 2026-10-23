@@ -286,9 +286,17 @@ export class SaasSubscription {
     this.saasService.getOrganization(org_id).subscribe({
       next: (org) => {
         this.currentTier.set(org.subscription_tier);
-        this.loading.set(false);
+        this.saasService.getSubscription(org_id).subscribe({
+          next: (subscription) => {
+            this.subscription.set(subscription);
+            this.loading.set(false);
+          },
+          error: () => {
+            this.loading.set(false);
+          },
+        });
       },
-      error: (err) => {
+      error: () => {
         this.error.set('Failed to load subscription details');
         this.loading.set(false);
       },

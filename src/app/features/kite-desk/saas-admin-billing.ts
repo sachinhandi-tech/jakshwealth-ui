@@ -57,6 +57,7 @@ import { SaasService } from './saas.service';
 
         <div class="invoices-section">
           <h3>Invoices</h3>
+          @if (invoices.length > 0) {
           <table class="invoices-table">
             <thead>
               <tr>
@@ -83,6 +84,7 @@ import { SaasService } from './saas.service';
               }
             </tbody>
           </table>
+          }
           @if (invoices.length === 0) {
             <p class="no-invoices">No invoices available yet</p>
           }
@@ -306,26 +308,7 @@ export class SaasAdminBilling {
   readonly organization = signal<Organization | null>(null);
   readonly subscription = signal<Subscription | null>(null);
 
-  invoices = [
-    {
-      id: '1',
-      date: '2026-10-01',
-      amount: 499,
-      status: 'paid',
-    },
-    {
-      id: '2',
-      date: '2026-09-01',
-      amount: 499,
-      status: 'paid',
-    },
-    {
-      id: '3',
-      date: '2026-08-01',
-      amount: 499,
-      status: 'paid',
-    },
-  ];
+  invoices: { id: string; date: string; amount: number; status: string }[] = [];
 
   constructor() {
     this.loadCurrentUserAndBillingInfo();
