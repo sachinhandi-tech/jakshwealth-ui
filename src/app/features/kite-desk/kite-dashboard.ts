@@ -1,5 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnDestroy, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, OnDestroy, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription, timer } from 'rxjs';
@@ -65,17 +65,23 @@ export class KiteDashboard implements OnDestroy {
       longWindow: 50,
       trendWindow: 200,
       lookbackDays: 60,
-      maxStocks: 25,
+      maxStocks: 100,
     },
     long: {
       trendWindow: 200,
       lookbackDays: 120,
-      maxStocks: 25,
+      maxStocks: 100,
     },
   };
 
   constructor() {
     this.loadProfile();
+    effect(() => {
+      const scanAll = this.scanAllNse();
+      const maxStocks = scanAll ? 3080 : 100;
+      this.scans.short.maxStocks = maxStocks;
+      this.scans.long.maxStocks = maxStocks;
+    });
   }
 
   ngOnDestroy(): void {
