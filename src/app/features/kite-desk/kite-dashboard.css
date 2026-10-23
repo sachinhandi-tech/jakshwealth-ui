@@ -181,8 +181,9 @@
 }
 
 .desk__checkbox-group {
-  margin-bottom: 1rem;
-  padding: 0.75rem 0;
+  margin-bottom: 1.5rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .desk__checkbox-label {
@@ -193,12 +194,14 @@
   color: var(--jw-text);
   font-size: 0.9375rem;
   font-weight: 500;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .desk__checkbox {
   width: 1.25rem;
   height: 1.25rem;
+  min-width: 1.25rem;
+  min-height: 1.25rem;
   cursor: pointer;
   accent-color: var(--jw-cyan);
   flex-shrink: 0;
