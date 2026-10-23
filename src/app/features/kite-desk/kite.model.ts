@@ -57,6 +57,7 @@ export interface KiteSignal {
   long_sma: number;
   trend_sma: number | null;
   trend_bias: 'above' | 'below' | null;
+  reason: string;
 }
 
 export interface KiteSignalJob {

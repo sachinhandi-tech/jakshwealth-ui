@@ -226,14 +226,14 @@
 }
 
 .desk__row--signals {
-  grid-template-columns: 3.2rem 6.5rem minmax(10rem, 1.5fr) 8rem 8rem 5.5rem 5.5rem 5.5rem;
-  min-width: 52rem;
+  grid-template-columns: 3.2rem 6.5rem minmax(10rem, 1.3fr) 8rem 8rem 5.5rem 5.5rem 6.5rem minmax(16rem, 2fr);
+  min-width: 72rem;
   align-items: center;
 }
 
 .desk__row--short {
-  grid-template-columns: 3.2rem 6.5rem minmax(9rem, 1.4fr) 8rem 8rem 5.5rem 5.5rem 5.5rem 5.5rem 6.5rem;
-  min-width: 68rem;
+  grid-template-columns: 3.2rem 6.5rem minmax(9rem, 1.2fr) 7.5rem 8rem 5.5rem 5.5rem 5.5rem 5.5rem 6rem minmax(16rem, 2fr);
+  min-width: 88rem;
 }
 
 .desk__badge {

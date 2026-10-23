@@ -16,6 +16,7 @@ function row(overrides: Partial<KiteSignal> & Pick<KiteSignal, 'rank' | 'ticker'
     long_sma: 20,
     trend_sma: 30,
     trend_bias: 'above',
+    reason: 'The 20 EMA crossed above the 50 SMA.',
     ...overrides,
   };
 }
@@ -144,7 +145,7 @@ describe('KiteDashboard signals', () => {
     expect(tickers()).toEqual(['INFY', 'TCS']);
 
     const headers = [...fixture.nativeElement.querySelectorAll('.desk__sort')] as HTMLButtonElement[];
-    expect(headers).toHaveLength(10);
+    expect(headers).toHaveLength(11);
     expect(headers.map(header => header.getAttribute('aria-sort'))).toContain('ascending');
   });
 
@@ -173,6 +174,6 @@ describe('KiteDashboard signals', () => {
     expect(tickers()).toEqual(['SBIN', 'HDFCBANK']);
 
     const headers = [...fixture.nativeElement.querySelectorAll('.desk__sort')] as HTMLButtonElement[];
-    expect(headers).toHaveLength(8);
+    expect(headers).toHaveLength(9);
   });
 });

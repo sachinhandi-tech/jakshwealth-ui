@@ -212,12 +212,14 @@ export class KiteDashboard implements OnDestroy {
         { key: 'long_sma', label: `${this.averageName(result.long_type)} ${result.long_window}` },
         { key: 'trend_sma', label: `SMA ${result.trend_window}` },
         { key: 'trend_bias', label: 'Long-term' },
+        { key: 'reason', label: 'Reason' },
       ];
     }
     return [
       ...shared,
       { key: 'long_sma', label: `SMA ${result.long_window}` },
       { key: 'trend_bias', label: 'Long-term' },
+      { key: 'reason', label: 'Reason' },
     ];
   }
 
@@ -289,7 +291,7 @@ export class KiteDashboard implements OnDestroy {
   }
 }
 
-type SignalSortKey = 'rank' | 'ticker' | 'company' | 'crossover_type' | 'crossover_date' | 'close' | 'short_sma' | 'long_sma' | 'trend_sma' | 'trend_bias';
+type SignalSortKey = 'rank' | 'ticker' | 'company' | 'crossover_type' | 'crossover_date' | 'close' | 'short_sma' | 'long_sma' | 'trend_sma' | 'trend_bias' | 'reason';
 
 function compareSignals(left: KiteSignal, right: KiteSignal, key: SignalSortKey, direction: number): number {
   const leftValue = signalValue(left, key);
