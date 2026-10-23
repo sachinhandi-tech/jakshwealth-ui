@@ -22,5 +22,36 @@ export const routes: Routes = [
       },
     ],
   },
+  {
+    path: 'settings',
+    children: [
+      {
+        path: 'subscription',
+        title: 'Subscription Settings',
+        canActivate: [kiteAuthGuard],
+        loadComponent: () =>
+          import('./features/kite-desk/saas-subscription').then(m => m.SaasSubscription),
+      },
+    ],
+  },
+  {
+    path: 'admin',
+    children: [
+      {
+        path: 'users',
+        title: 'Manage Team Members',
+        canActivate: [kiteAuthGuard],
+        loadComponent: () =>
+          import('./features/kite-desk/saas-admin-users').then(m => m.SaasAdminUsers),
+      },
+      {
+        path: 'billing',
+        title: 'Billing & Invoices',
+        canActivate: [kiteAuthGuard],
+        loadComponent: () =>
+          import('./features/kite-desk/saas-admin-billing').then(m => m.SaasAdminBilling),
+      },
+    ],
+  },
   { path: '**', redirectTo: 'kite/dashboard' },
 ];

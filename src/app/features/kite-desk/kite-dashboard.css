@@ -320,3 +320,26 @@
     align-items: flex-start;
   }
 }
+
+.desk__header-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.desk__header-actions button {
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .desk__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .desk__header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}

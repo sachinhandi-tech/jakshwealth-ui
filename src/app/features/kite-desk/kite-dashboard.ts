@@ -258,6 +258,18 @@ export class KiteDashboard implements OnDestroy {
     });
   }
 
+  navigateToSubscription(): void {
+    this.router.navigate(['/settings/subscription']);
+  }
+
+  navigateToUsers(): void {
+    this.router.navigate(['/admin/users']);
+  }
+
+  navigateToBilling(): void {
+    this.router.navigate(['/admin/billing']);
+  }
+
   private loadProfile(): void {
     this.profileLoading.set(true);
     this.kite.profile().subscribe({
