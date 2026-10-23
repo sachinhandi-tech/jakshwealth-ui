@@ -3,6 +3,8 @@ import { firstValueFrom, Subscription } from 'rxjs';
 
 import { BreakoutSetup, readStocks, scanBreakouts } from './algo-scanner';
 import {
+  AlgoSetupResult,
+  AlgoSetupRow,
   GttOrderRequest,
   GttOrderResult,
 } from './kite.model';
@@ -28,6 +30,19 @@ export interface GttViewRow {
 
 const blockedStates = new Set(['blocked', 'already_active', 'position_exists', 'day_buy_order_exists']);
 
+export interface FinalTrade {
+  symbol: string;
+  call: string;
+  entry: number;
+  stop: number;
+  target: number;
+  lastClose: number;
+  quantityLabel: string;
+  reason: string;
+  exchange: string;
+  gttTradable: boolean;
+}
+
 @Injectable()
 export class AlgoDeskStore implements OnDestroy {
   private readonly kite = inject(KiteService);
@@ -46,6 +61,11 @@ export class AlgoDeskStore implements OnDestroy {
   readonly tickStatus = signal('Connecting to live ticks…');
   readonly running = signal(false);
   readonly gttError = signal<string | null>(null);
+  readonly finalTrades = signal<FinalTrade[]>([]);
+  readonly sellCalls = signal<FinalTrade[]>([]);
+  readonly finalLoading = signal(false);
+  readonly finalError = signal<string | null>(null);
+  readonly finalNote = signal('');
   readonly livePrices = signal<ReadonlyMap<number, number>>(new Map());
   readonly snapshotPrices = signal<ReadonlyMap<string, number>>(new Map());
   private readonly gttResults = signal<ReadonlyMap<string, GttOrderResult>>(new Map());
@@ -88,12 +108,19 @@ export class AlgoDeskStore implements OnDestroy {
       if (this.error()) {
         return;
       }
-      await new Promise<void>(resolve => this.refreshSnapshot(resolve));
-      this.gttResults.set(new Map());
-      const candidates = this.candidates();
-      if (candidates.length === 0) {
+      await this.refreshFinal();
+      if (this.finalError()) {
+        this.gttError.set(this.finalError());
         return;
       }
+      const approved = this.finalTrades().filter(row => row.gttTradable && row.call === 'buy' && row.entry > 0);
+      if (approved.length === 0) {
+        this.gttError.set(this.finalNote() || 'No approved stock to send.');
+        return;
+      }
+      await new Promise<void>(resolve => this.refreshSnapshot(resolve));
+      this.gttResults.set(new Map());
+      const candidates = approved.map(row => this.toOrder(row));
       const state = await firstValueFrom(this.kite.gttState(candidates));
       this.remember(state.orders);
       const ready = (state.orders ?? []).filter(isReady);
@@ -106,6 +133,38 @@ export class AlgoDeskStore implements OnDestroy {
       this.gttError.set(readError(err));
     } finally {
       this.running.set(false);
+    }
+  }
+
+  async refreshFinal(): Promise<void> {
+    this.finalLoading.set(true);
+    this.finalError.set(null);
+    try {
+      if (!this.loaded) {
+        await this.reload();
+      }
+      if (this.error()) {
+        return;
+      }
+      const stocks = this.setups().map(setup => ({
+        symbol: setup.symbol,
+        company_name: setup.companyName,
+        exchange: 'NSE',
+        instrument_type: 'EQ',
+        candles: setup.candles,
+      }));
+      if (stocks.length === 0) {
+        this.finalTrades.set([]);
+        this.sellCalls.set([]);
+        this.finalNote.set('No breakout is waiting for a final call.');
+        return;
+      }
+      const result = await firstValueFrom(this.kite.algoSetups(stocks));
+      this.applyFinal(result);
+    } catch (err) {
+      this.finalError.set(readError(err));
+    } finally {
+      this.finalLoading.set(false);
     }
   }
 
@@ -218,17 +277,43 @@ export class AlgoDeskStore implements OnDestroy {
       : readError(err));
   }
 
-  private candidates(): GttOrderRequest[] {
-    return this.setups().map(setup => {
-      const buy = setup.breakoutLow > 0 ? setup.breakoutLow : null;
-      return {
-        symbol: setup.symbol,
-        quantity: 1,
-        buy_price: buy,
-        stoploss: buy === null ? null : buy * 0.95,
-        last_price: this.quotePrice(setup),
-      };
-    });
+  private applyFinal(result: AlgoSetupResult): void {
+    const buys = (result.setups ?? [])
+      .filter(row => row.gtt_tradable === true && row.ai_decision === 'buy')
+      .map(row => toFinal(row, 'buy'));
+    const sells = (result.sell_calls ?? [])
+      .filter(row => row.ai_decision === 'sell')
+      .map(row => toFinal(row, 'sell'));
+    this.finalTrades.set(buys);
+    this.sellCalls.set(sells);
+    if (buys.length === 0) {
+      const stoodAside = (result.setups ?? []).find(row => row.ai_reason);
+      this.finalNote.set(stoodAside?.ai_reason || 'No stock was approved for a trade.');
+      return;
+    }
+    this.finalNote.set('');
+  }
+
+  private toOrder(row: FinalTrade): GttOrderRequest {
+    return {
+      symbol: row.symbol,
+      exchange: row.exchange,
+      quantity: 1,
+      buy_price: row.entry,
+      stoploss: row.stop,
+      last_price: this.lastFor(row),
+    };
+  }
+
+  private lastFor(row: FinalTrade): number | null {
+    const setup = this.setups().find(item => item.symbol === row.symbol);
+    if (setup) {
+      const quote = this.quotePrice(setup);
+      if (quote !== null) {
+        return quote;
+      }
+    }
+    return row.lastClose > 0 ? row.lastClose : null;
   }
 
   private remember(orders: GttOrderResult[] | null | undefined): void {
@@ -359,6 +444,27 @@ export class AlgoDeskStore implements OnDestroy {
     socket.onclose = null;
     socket.close();
   }
+}
+
+function toFinal(row: AlgoSetupRow, call: string): FinalTrade {
+  let quantityLabel = '1 lakh';
+  if (row.quantity_basis === 'one_lot') {
+    quantityLabel = '1 lot';
+  } else if (typeof row.quantity === 'number' && row.quantity > 0) {
+    quantityLabel = String(row.quantity);
+  }
+  return {
+    symbol: row.symbol,
+    call,
+    entry: row.entry ?? 0,
+    stop: row.stop ?? 0,
+    target: row.target ?? 0,
+    lastClose: row.last_close ?? 0,
+    quantityLabel,
+    reason: row.ai_reason || row.reason || '',
+    exchange: row.exchange || 'NSE',
+    gttTradable: row.gtt_tradable === true,
+  };
 }
 
 function isReady(order: GttOrderResult): boolean {

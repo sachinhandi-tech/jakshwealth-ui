@@ -17,12 +17,13 @@ import {
 } from './kite.model';
 import { AlgoDeskStore } from './algo-desk.store';
 import { AlgoSignals } from './algo-signals';
+import { FinalTrades } from './final-trades';
 import { GttPlacement } from './gtt-placement';
 import { KiteService } from './kite.service';
 
 @Component({
   selector: 'app-kite-dashboard',
-  imports: [FormsModule, DatePipe, DecimalPipe, AlgoSignals, GttPlacement],
+  imports: [FormsModule, DatePipe, DecimalPipe, AlgoSignals, FinalTrades, GttPlacement],
   templateUrl: './kite-dashboard.html',
   styleUrl: './kite-dashboard.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,6 +38,7 @@ export class KiteDashboard implements OnDestroy {
     { id: 'market', label: 'Market' },
     { id: 'signals', label: 'Signals' },
     { id: 'algo', label: 'Algo Signals' },
+    { id: 'final', label: 'Final list' },
     { id: 'gtt', label: 'GTT Placement' },
   ];
 

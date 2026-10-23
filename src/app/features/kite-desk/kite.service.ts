@@ -11,6 +11,7 @@ import {
   KiteSignalJob,
   KiteSignalRequest,
   KiteSubscriber,
+  AlgoSetupResult,
   GttOrderRequest,
   GttOrderResponse,
   OhlcSnapshot,
@@ -103,6 +104,12 @@ export class KiteService {
   gttState(orders: GttOrderRequest[]): Observable<GttOrderResponse> {
     const apiBase = currentKiteApiBase().replace(/\/kite$/, '');
     return this.http.post<GttOrderResponse>(`${apiBase}/algo-orders/gtt-state`, { orders }, {
+      headers: this.deskHeaders(),
+    });
+  }
+
+  algoSetups(stocks: unknown[]): Observable<AlgoSetupResult> {
+    return this.http.post<AlgoSetupResult>(`${currentKiteApiBase()}/algo/setups`, { stocks }, {
       headers: this.deskHeaders(),
     });
   }

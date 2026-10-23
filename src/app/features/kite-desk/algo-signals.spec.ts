@@ -124,5 +124,15 @@ describe('Algo Signals tab', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('High-volume breakout and retest setups');
     expect(fixture.nativeElement.textContent).toContain('No breakout retest setups match the current parameters.');
+    expect(fixture.nativeElement.textContent).not.toContain('Run Live');
+    const finalButton = [...fixture.nativeElement.querySelectorAll('button')].find(item =>
+      item.textContent?.includes('Final list'),
+    ) as HTMLButtonElement;
+    finalButton.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Run Live');
+    expect(fixture.nativeElement.textContent).toContain('No breakout is waiting for a final call.');
   });
 });

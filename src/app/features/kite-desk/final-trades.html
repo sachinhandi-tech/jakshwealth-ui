@@ -1,0 +1,63 @@
+<section class="jw-glass-card desk__panel algo" aria-labelledby="final-trades-title">
+  <div class="algo__head">
+    <div>
+      <h2 id="final-trades-title">Final list</h2>
+      <p class="algo__note">These are the names the model approved. Run Live places a buy GTT only for this list. A sell call is not sent as an order.</p>
+    </div>
+    <button type="button" class="jw-btn jw-btn--primary" (click)="runLive()" [disabled]="store.running() || store.loading() || store.finalLoading()">
+      {{ store.running() ? 'Running...' : 'Run Live' }}
+    </button>
+  </div>
+  @if (store.gttError(); as message) {
+    <p class="desk__alert" role="alert">{{ message }}</p>
+  }
+  @if (store.finalError(); as message) {
+    <p class="desk__alert" role="alert">{{ message }}</p>
+  }
+
+  @if (store.finalLoading() || store.loading()) {
+    <p class="desk__status">Building the final list…</p>
+  } @else if (store.finalTrades().length === 0) {
+    <p class="desk__status">{{ store.finalNote() || 'No stock was approved for a trade.' }}</p>
+  } @else {
+    <div class="algo__scroll">
+      <table class="algo__table">
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Call</th>
+            <th>Entry</th>
+            <th>Stop</th>
+            <th>Target</th>
+            <th>Last</th>
+            <th>Size</th>
+            <th>Reason</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of store.finalTrades(); track row.symbol) {
+            <tr>
+              <td><strong class="algo__symbol">{{ row.symbol }}</strong></td>
+              <td>{{ row.call }}</td>
+              <td>{{ row.entry | number:'1.2-2' }}</td>
+              <td>{{ row.stop | number:'1.2-2' }}</td>
+              <td>{{ row.target | number:'1.2-2' }}</td>
+              <td>{{ row.lastClose | number:'1.2-2' }}</td>
+              <td>{{ row.quantityLabel }}</td>
+              <td>{{ row.reason }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (store.sellCalls().length > 0) {
+    <h3 class="algo__table-title">Sell calls</h3>
+    <ul class="algo__summary">
+      @for (row of store.sellCalls(); track row.symbol) {
+        <li><strong>{{ row.symbol }}</strong> {{ row.reason }}</li>
+      }
+    </ul>
+  }
+</section>

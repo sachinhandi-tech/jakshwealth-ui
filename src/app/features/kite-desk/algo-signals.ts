@@ -34,8 +34,4 @@ export class AlgoSignals {
   selectRow(symbol: string): void {
     this.selectedSymbol.set(symbol);
   }
-
-  runLive(): Promise<void> {
-    return this.store.runLive();
-  }
 }

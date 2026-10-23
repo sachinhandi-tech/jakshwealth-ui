@@ -93,10 +93,33 @@ export interface OhlcSnapshot {
 
 export interface GttOrderRequest {
   symbol: string;
+  exchange?: string;
   quantity: number;
   buy_price: number | null;
   stoploss: number | null;
   last_price: number | null;
+}
+
+export interface AlgoSetupRow {
+  symbol: string;
+  exchange?: string;
+  ai_decision?: string | null;
+  ai_reason?: string | null;
+  gtt_tradable?: boolean;
+  entry?: number;
+  stop?: number;
+  target?: number;
+  last_close?: number;
+  quantity?: number | null;
+  quantity_basis?: string;
+  reason?: string;
+}
+
+export interface AlgoSetupResult {
+  scanned: number;
+  accepted: number;
+  setups: AlgoSetupRow[];
+  sell_calls?: AlgoSetupRow[];
 }
 
 export interface GttOrderResult {
@@ -123,7 +146,7 @@ export interface GttOrderResponse {
   orders: GttOrderResult[];
 }
 
-export type KiteDeskTab = 'user' | 'market' | 'signals' | 'algo' | 'gtt';
+export type KiteDeskTab = 'user' | 'market' | 'signals' | 'algo' | 'final' | 'gtt';
 
 export interface KiteDeskTabItem {
   id: KiteDeskTab;

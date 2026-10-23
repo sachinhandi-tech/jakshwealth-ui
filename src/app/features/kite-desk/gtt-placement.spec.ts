@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 import { rankedScannerPayload } from './algo-scanner.fixture';
 import { AlgoDeskStore } from './algo-desk.store';
 import { AlgoSignals } from './algo-signals';
+import { FinalTrades } from './final-trades';
 import { GttPlacement } from './gtt-placement';
 import { GttOrderResult } from './kite.model';
 import { KiteService } from './kite.service';
@@ -20,6 +21,22 @@ class FakeSocket {
     this.onerror = null;
     this.onclose = null;
   }
+}
+
+function approved(symbol: string, entry: number, stop: number, target: number, last: number) {
+  return {
+    symbol,
+    exchange: 'NSE',
+    ai_decision: 'buy',
+    gtt_tradable: true,
+    entry,
+    stop,
+    target,
+    last_close: last,
+    quantity: 1000,
+    quantity_basis: 'equity_notional',
+    ai_reason: `Entry ${entry} and volume above 3.`,
+  };
 }
 
 function result(overrides: Partial<GttOrderResult>): GttOrderResult {
@@ -52,11 +69,12 @@ describe('GTT Placement', () => {
   async function setup(stateOrders: GttOrderResult[], liveOrders: GttOrderResult[]): Promise<{
     placement: ComponentFixture<GttPlacement>;
     signals: ComponentFixture<AlgoSignals>;
+    trades: ComponentFixture<FinalTrades>;
   }> {
     socket = new FakeSocket();
     liveCalls = [];
     TestBed.configureTestingModule({
-      imports: [AlgoSignals, GttPlacement],
+      imports: [AlgoSignals, FinalTrades, GttPlacement],
       providers: [
         provideZonelessChangeDetection(),
         AlgoDeskStore,
@@ -66,6 +84,12 @@ describe('GTT Placement', () => {
             scannerData: () => of(rankedScannerPayload()),
             ohlcSnapshot: () => of({ quotes: [{ symbol: 'INFY', last_price: 101 }, { symbol: 'TCS', last_price: 111 }] }),
             openTicks: () => socket as unknown as WebSocket,
+            algoSetups: () => of({
+              scanned: 2,
+              accepted: 2,
+              setups: [approved('INFY', 100, 90, 120, 101), approved('TCS', 110, 100, 130, 111)],
+              sell_calls: [],
+            }),
             gttState: () => of({ orders: stateOrders }),
             liveGtt: (orders: unknown[]) => {
               liveCalls.push({ confirm_live: true, orders } as { confirm_live: boolean });
@@ -79,15 +103,19 @@ describe('GTT Placement', () => {
     signals.detectChanges();
     await signals.whenStable();
     signals.detectChanges();
+    const trades = TestBed.createComponent(FinalTrades);
+    trades.detectChanges();
+    await trades.whenStable();
+    trades.detectChanges();
     const placement = TestBed.createComponent(GttPlacement);
     placement.detectChanges();
     await placement.whenStable();
     placement.detectChanges();
-    return { placement, signals };
+    return { placement, signals, trades };
   }
 
   it('renders read-only placement rows from Algo Signals and has no placement button', async () => {
-    const { placement, signals } = await setup([], []);
+    const { placement, signals, trades } = await setup([], []);
     const text = placement.nativeElement.textContent as string;
     expect(text).toContain('GTT Order Placement');
     expect(text).toContain('Kite GTT Placement');
@@ -96,7 +124,9 @@ describe('GTT Placement', () => {
     expect(text).toContain('TCS');
     expect(placement.nativeElement.querySelector('button')).toBeNull();
     expect(text).not.toContain('Run Live');
-    expect(signals.nativeElement.textContent).toContain('Run Live');
+    expect(signals.nativeElement.textContent).not.toContain('Run Live');
+    expect(trades.nativeElement.textContent).toContain('Run Live');
+    expect(trades.nativeElement.textContent).toContain('INFY');
   });
 
   it('places a real buy from Run Live and does not send a blocked row', async () => {
@@ -110,9 +140,9 @@ describe('GTT Placement', () => {
       buy_trigger_id: '4242',
       message: 'Buy GTT placed on Kite. Stoploss planned after buy execution.',
     })];
-    const { placement: fixture, signals } = await setup(ready, placed);
-    expect(signals.nativeElement.textContent).toContain('Run Live');
-    await signals.componentInstance.runLive();
+    const { placement: fixture, trades } = await setup(ready, placed);
+    expect(trades.nativeElement.textContent).toContain('Run Live');
+    await trades.componentInstance.runLive();
     fixture.detectChanges();
 
     expect(liveCalls).toHaveLength(1);
