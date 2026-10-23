@@ -107,10 +107,12 @@
           </div>
         </div>
 
-        <label class="desk__field">
-          <input type="checkbox" [(ngModel)]="scanAllNse" [ngModelOptions]="{ standalone: true }" />
-          <span>Scan all 3080 NSE stocks (instead of just Nifty 100)</span>
-        </label>
+        <div class="desk__checkbox-group">
+          <label class="desk__checkbox-label">
+            <input type="checkbox" class="desk__checkbox" [(ngModel)]="scanAllNse" [ngModelOptions]="{ standalone: true }" />
+            <span>Scan all 3080 NSE stocks (instead of just Nifty 100)</span>
+          </label>
+        </div>
 
         <nav class="desk__tabs desk__subtabs" aria-label="Signal horizon">
           @for (kind of horizonKinds; track kind) {
