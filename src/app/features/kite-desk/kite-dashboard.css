@@ -193,6 +193,7 @@
   color: var(--jw-text);
   font-size: 0.9375rem;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .desk__checkbox {
@@ -201,6 +202,7 @@
   cursor: pointer;
   accent-color: var(--jw-cyan);
   flex-shrink: 0;
+  margin-top: 0.125rem;
 }
 
 .desk__scroll {
