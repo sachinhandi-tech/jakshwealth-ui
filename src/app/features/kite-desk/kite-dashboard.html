@@ -186,7 +186,7 @@
               </button>
             </form>
           }
-          <p class="desk__note">Each scan reads daily Kite candles for {{ scanAllNse ? 'all 3080 NSE stocks' : 'the Nifty 100 list' }} and takes about a minute. The 200 SMA needs about a year of daily history.</p>
+          <p class="desk__note">Each scan reads daily Kite candles for {{ scanAllNse() ? 'all 3080 NSE stocks' : 'the Nifty 100 list' }} and takes about a minute. The 200 SMA needs about a year of daily history.</p>
 
           @if (scanError()[kind]; as error) {
             <p class="desk__alert" role="alert">{{ error }}</p>
@@ -196,7 +196,7 @@
           }
           @if (scanResult()[kind]; as result) {
             <p class="desk__note">
-              Checked {{ result.scanned }} of {{ result.universe }} {{ scanAllNse ? 'NSE' : 'Nifty 100' }} stocks.
+              Checked {{ result.scanned }} of {{ result.universe }} {{ scanAllNse() ? 'NSE' : 'Nifty 100' }} stocks.
               @if (result.skipped > 0) {
                 {{ result.skipped }} had no matching NSE history.
               }
