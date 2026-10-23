@@ -19,6 +19,13 @@ export class SaasService {
     return userId ? this.headers.set('X-Platform-User-Id', userId) : this.headers;
   }
 
+  getCurrentUser(): Observable<{ org_id: string; user_id: string; name: string; email: string; subscription_tier: string; user_role: string }> {
+    return this.http.get<{ org_id: string; user_id: string; name: string; email: string; subscription_tier: string; user_role: string }>(
+      `${currentKiteApiBase()}/admin/me`,
+      { headers: this.deskHeaders() },
+    );
+  }
+
   getOrganization(org_id: string): Observable<Organization> {
     return this.http.get<Organization>(
       `${currentKiteApiBase()}/admin/organizations/${org_id}`,

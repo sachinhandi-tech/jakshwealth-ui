@@ -328,10 +328,19 @@ export class SaasAdminBilling {
   ];
 
   constructor() {
-    const orgId = this.getOrgIdFromUrl();
-    if (orgId) {
-      this.loadBillingInfo(orgId);
-    }
+    this.loadCurrentUserAndBillingInfo();
+  }
+
+  private loadCurrentUserAndBillingInfo(): void {
+    this.saasService.getCurrentUser().subscribe({
+      next: (user) => {
+        this.loadBillingInfo(user.org_id);
+      },
+      error: () => {
+        this.error.set('Failed to load billing information');
+        this.loading.set(false);
+      },
+    });
   }
 
   private loadBillingInfo(org_id: string): void {

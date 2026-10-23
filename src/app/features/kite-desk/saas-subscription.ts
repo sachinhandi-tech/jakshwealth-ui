@@ -264,11 +264,20 @@ export class SaasSubscription {
   ];
 
   constructor() {
-    // Load current subscription from URL parameter or fetch
-    const orgId = this.getOrgIdFromUrl();
-    if (orgId) {
-      this.loadSubscription(orgId);
-    }
+    this.loadCurrentUserAndSubscription();
+  }
+
+  private loadCurrentUserAndSubscription(): void {
+    this.saasService.getCurrentUser().subscribe({
+      next: (user) => {
+        this.currentTier.set(user.subscription_tier as 'free' | 'pro' | 'enterprise');
+        this.loadSubscription(user.org_id);
+      },
+      error: () => {
+        this.error.set('Failed to load subscription');
+        this.loading.set(false);
+      },
+    });
   }
 
   private loadSubscription(org_id: string): void {
@@ -285,8 +294,12 @@ export class SaasSubscription {
   }
 
   upgradeTier(tier: 'free' | 'pro' | 'enterprise'): void {
-    const orgId = this.getOrgIdFromUrl();
-    if (!orgId) return;
+    this.saasService.getCurrentUser().subscribe((user) => {
+      this.upgradeTierWithOrgId(user.org_id, tier);
+    });
+  }
+
+  private upgradeTierWithOrgId(orgId: string, tier: 'free' | 'pro' | 'enterprise'): void {
 
     this.upgrading.set(true);
     this.saasService.updateSubscription(orgId, tier).subscribe({

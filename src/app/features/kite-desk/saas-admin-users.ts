@@ -262,10 +262,19 @@ export class SaasAdminUsers {
   };
 
   constructor() {
-    const orgId = this.getOrgIdFromUrl();
-    if (orgId) {
-      this.loadUsers(orgId);
-    }
+    this.loadCurrentUserAndUsers();
+  }
+
+  private loadCurrentUserAndUsers(): void {
+    this.saasService.getCurrentUser().subscribe({
+      next: (user) => {
+        this.loadUsers(user.org_id);
+      },
+      error: () => {
+        this.error.set('Failed to load user organization');
+        this.loading.set(false);
+      },
+    });
   }
 
   private loadUsers(org_id: string): void {
@@ -287,8 +296,12 @@ export class SaasAdminUsers {
       return;
     }
 
-    const orgId = this.getOrgIdFromUrl();
-    if (!orgId) return;
+    this.saasService.getCurrentUser().subscribe((user) => {
+      this.addUserWithOrgId(user.org_id);
+    });
+  }
+
+  private addUserWithOrgId(orgId: string): void {
 
     this.adding.set(true);
     this.saasService.addUser(orgId, this.newUser).subscribe({
@@ -305,8 +318,12 @@ export class SaasAdminUsers {
   }
 
   removeUser(user_id: string): void {
-    const orgId = this.getOrgIdFromUrl();
-    if (!orgId) return;
+    this.saasService.getCurrentUser().subscribe((user) => {
+      this.removeUserWithOrgId(user.org_id, user_id);
+    });
+  }
+
+  private removeUserWithOrgId(orgId: string, user_id: string): void {
 
     this.removingId.set(user_id);
     this.saasService.removeUser(orgId, user_id).subscribe({
