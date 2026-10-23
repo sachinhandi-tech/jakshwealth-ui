@@ -270,11 +270,13 @@ export class SaasSubscription {
   private loadCurrentUserAndSubscription(): void {
     this.saasService.getCurrentUser().subscribe({
       next: (user) => {
+        console.log('Got user for subscription:', user);
         this.currentTier.set(user.subscription_tier as 'free' | 'pro' | 'enterprise');
         this.loadSubscription(user.org_id);
       },
-      error: () => {
-        this.error.set('Failed to load subscription');
+      error: (err) => {
+        console.error('Failed to load user for subscription:', err);
+        this.error.set('Failed to load subscription: ' + (err?.error?.detail || err?.message || 'Unknown error'));
         this.loading.set(false);
       },
     });

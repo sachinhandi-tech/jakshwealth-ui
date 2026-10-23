@@ -334,10 +334,12 @@ export class SaasAdminBilling {
   private loadCurrentUserAndBillingInfo(): void {
     this.saasService.getCurrentUser().subscribe({
       next: (user) => {
+        console.log('Got user for billing:', user);
         this.loadBillingInfo(user.org_id);
       },
-      error: () => {
-        this.error.set('Failed to load billing information');
+      error: (err) => {
+        console.error('Failed to load user for billing:', err);
+        this.error.set('Failed to load billing information: ' + (err?.error?.detail || err?.message || 'Unknown error'));
         this.loading.set(false);
       },
     });

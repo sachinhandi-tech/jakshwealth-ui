@@ -268,10 +268,12 @@ export class SaasAdminUsers {
   private loadCurrentUserAndUsers(): void {
     this.saasService.getCurrentUser().subscribe({
       next: (user) => {
+        console.log('Got user org:', user);
         this.loadUsers(user.org_id);
       },
-      error: () => {
-        this.error.set('Failed to load user organization');
+      error: (err) => {
+        console.error('Failed to load user org:', err);
+        this.error.set('Failed to load user organization: ' + (err?.error?.detail || err?.message || 'Unknown error'));
         this.loading.set(false);
       },
     });
