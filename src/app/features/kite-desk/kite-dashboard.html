@@ -163,7 +163,7 @@
               </label>
               <label class="desk__field">
                 <span>Max Stocks</span>
-                <input class="desk__input" type="number" name="shortMax" min="1" max="100" [(ngModel)]="scans.short.maxStocks" required />
+                <input class="desk__input" type="number" name="shortMax" min="1" [max]="scanAllNse() ? 3080 : 100" [(ngModel)]="scans.short.maxStocks" required />
               </label>
               <button class="jw-btn jw-btn--primary" type="submit" [disabled]="scanLoading().short">
                 {{ scanLoading().short ? 'Scanning…' : 'Generate short term' }}
@@ -181,7 +181,7 @@
               </label>
               <label class="desk__field">
                 <span>Max Stocks</span>
-                <input class="desk__input" type="number" name="longMax" min="1" max="100" [(ngModel)]="scans.long.maxStocks" required />
+                <input class="desk__input" type="number" name="longMax" min="1" [max]="scanAllNse() ? 3080 : 100" [(ngModel)]="scans.long.maxStocks" required />
               </label>
               <button class="jw-btn jw-btn--primary" type="submit" [disabled]="scanLoading().long">
                 {{ scanLoading().long ? 'Scanning…' : 'Generate long term' }}
