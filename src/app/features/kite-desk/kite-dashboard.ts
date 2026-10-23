@@ -47,6 +47,7 @@ export class KiteDashboard implements OnDestroy {
   readonly quoteError = signal<string | null>(null);
   readonly profileLoading = signal(true);
   readonly quotesLoading = signal(false);
+  readonly scanAllNse = signal(false);
   readonly horizonKinds: SignalHorizon[] = ['short', 'long'];
   readonly activeHorizon = signal<SignalHorizon>('short');
   readonly scanLoading = signal<Record<SignalHorizon, boolean>>({ short: false, long: false });
@@ -124,6 +125,7 @@ export class KiteDashboard implements OnDestroy {
       trend_window: Number(form.trendWindow),
       lookback_days: Number(form.lookbackDays),
       max_stocks: Number(form.maxStocks),
+      scan_all_nse: this.scanAllNse(),
     };
   }
 
@@ -139,6 +141,7 @@ export class KiteDashboard implements OnDestroy {
       trend_window: Number(form.trendWindow),
       lookback_days: Number(form.lookbackDays),
       max_stocks: Number(form.maxStocks),
+      scan_all_nse: this.scanAllNse(),
     };
   }
 
