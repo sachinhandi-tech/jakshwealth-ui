@@ -26,4 +26,8 @@ export class FinalTrades {
   runLive(): Promise<void> {
     return this.store.runLive();
   }
+
+  toggleScan(): Promise<void> {
+    return this.store.toggleScan();
+  }
 }

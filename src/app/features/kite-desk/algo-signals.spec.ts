@@ -136,6 +136,7 @@ describe('final list tab', () => {
     await fixture.whenStable();
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Run Live');
+    expect(fixture.nativeElement.textContent).toContain('Continue scan');
     expect(fixture.nativeElement.textContent).toContain('Reading NSE and BSE equities.');
     expect(fixture.nativeElement.textContent).toContain('No stock was approved for a trade.');
     expect(fixture.nativeElement.textContent).toContain('Equity');

@@ -4,9 +4,14 @@
       <h2 id="final-trades-title">Final list</h2>
       <p class="algo__note">The backend reads cash equities, stock futures, the nearest stock-option expiry, and commodity futures. Only a name that passed the moving-average crossover, the price and volume expansion, and the RSI momentum and ATR screen is sent to the model. The model then reads filings, news, and lawsuits. Run Live places a Zerodha buy GTT only for an approved buy. A sell call is not sent as an order.</p>
     </div>
-    <button type="button" class="jw-btn jw-btn--primary" (click)="runLive()" [disabled]="store.running() || store.loading() || store.finalLoading()">
-      {{ store.running() ? 'Running...' : 'Run Live' }}
-    </button>
+    <div class="algo__actions">
+      <button type="button" class="jw-btn" (click)="toggleScan()" [disabled]="store.scanBusy()">
+        {{ store.finalWorking() && !store.finalPaused() ? 'Stop scan' : 'Continue scan' }}
+      </button>
+      <button type="button" class="jw-btn jw-btn--primary" (click)="runLive()" [disabled]="store.running() || store.loading() || store.finalLoading()">
+        {{ store.running() ? 'Running...' : 'Run Live' }}
+      </button>
+    </div>
   </div>
   @if (store.gttError(); as message) {
     <p class="desk__alert" role="alert">{{ message }}</p>

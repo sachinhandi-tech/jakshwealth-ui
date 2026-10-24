@@ -122,6 +122,18 @@ export class KiteService {
     });
   }
 
+  stopScan(): Observable<AlgoSetupResult> {
+    return this.http.post<AlgoSetupResult>(`${currentKiteApiBase()}/algo/scan/stop`, {}, {
+      headers: this.deskHeaders(),
+    });
+  }
+
+  continueScan(): Observable<AlgoSetupResult> {
+    return this.http.post<AlgoSetupResult>(`${currentKiteApiBase()}/algo/scan/continue`, {}, {
+      headers: this.deskHeaders(),
+    });
+  }
+
   liveGtt(orders: GttOrderRequest[]): Observable<GttOrderResponse> {
     const apiBase = currentKiteApiBase().replace(/\/kite$/, '');
     return this.http.post<GttOrderResponse>(`${apiBase}/algo-orders/live-gtt`, {

@@ -9,6 +9,13 @@
   gap: 1rem;
 }
 
+.algo__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 .algo__head h2 {
   font-size: 1.15rem;
   margin: 0;

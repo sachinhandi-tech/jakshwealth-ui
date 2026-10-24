@@ -128,6 +128,7 @@ export interface AlgoSetupResult {
   sell_calls?: AlgoSetupRow[];
   universe_note?: string;
   working?: boolean;
+  paused?: boolean;
   activity?: FinalActivity[];
 }
 

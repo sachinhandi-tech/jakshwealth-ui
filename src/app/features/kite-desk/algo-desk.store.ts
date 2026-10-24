@@ -74,6 +74,8 @@ export class AlgoDeskStore implements OnDestroy {
   readonly finalNote = signal('');
   readonly finalActivity = signal<FinalActivity[]>([]);
   readonly finalWorking = signal(false);
+  readonly finalPaused = signal(false);
+  readonly scanBusy = signal(false);
   readonly crossoverSignals = signal<{ symbol: string; company_name: string; crossover_type: string }[]>([]);
   readonly livePrices = signal<ReadonlyMap<number, number>>(new Map());
   readonly snapshotPrices = signal<ReadonlyMap<string, number>>(new Map());
@@ -150,6 +152,25 @@ export class AlgoDeskStore implements OnDestroy {
       this.gttError.set(readError(err));
     } finally {
       this.running.set(false);
+    }
+  }
+
+  async toggleScan(): Promise<void> {
+    if (this.scanBusy()) {
+      return;
+    }
+    const stopping = this.finalWorking() && !this.finalPaused();
+    this.scanBusy.set(true);
+    this.finalError.set(null);
+    try {
+      const result = await firstValueFrom(stopping ? this.kite.stopScan() : this.kite.continueScan());
+      this.applyFinal(result);
+    } catch (err) {
+      if (!isGatewayWait(err)) {
+        this.finalError.set(readError(err));
+      }
+    } finally {
+      this.scanBusy.set(false);
     }
   }
 
@@ -297,7 +318,8 @@ export class AlgoDeskStore implements OnDestroy {
     this.finalByBook.set(groupBooks(buys));
     this.sellByBook.set(groupBooks(sells));
     this.finalActivity.set(result.activity ?? []);
-    const working = result.working === true || (result.working == null && !!result.universe_note);
+    this.finalPaused.set(result.paused === true);
+    const working = result.paused !== true && (result.working === true || (result.working == null && !!result.universe_note));
     this.finalWorking.set(working);
     this.scheduleFinal(working);
     if (buys.length === 0) {
