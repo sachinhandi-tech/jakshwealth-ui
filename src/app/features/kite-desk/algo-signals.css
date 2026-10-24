@@ -49,6 +49,50 @@
   font-size: 0.95rem;
 }
 
+.algo__books {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.15rem;
+  margin-top: 1.35rem;
+}
+
+.algo__book {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  min-height: 9.5rem;
+  padding: 1.2rem 1.3rem 1.3rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.algo__book .algo__table-title {
+  margin: 0;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+}
+
+.algo__book-empty {
+  margin: 0;
+  padding: 0.85rem 0.15rem 0.2rem;
+  color: var(--jw-text-muted);
+  line-height: 1.5;
+}
+
+.algo__book .algo__table th,
+.algo__book .algo__table td {
+  padding: 0.7rem 0.85rem;
+}
+
+@media (max-width: 860px) {
+  .algo__books {
+    grid-template-columns: 1fr;
+  }
+}
+
 .algo__scroll {
   overflow-x: auto;
 }

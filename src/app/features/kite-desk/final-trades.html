@@ -34,48 +34,52 @@
     <p class="desk__status">{{ store.finalNote() || 'No stock was approved for a trade.' }}</p>
   }
 
-  @for (grid of grids; track grid.id) {
-    <h3 class="algo__table-title" [id]="'final-' + grid.id">{{ grid.title }}</h3>
-    @if (store.finalByBook()[grid.id].length === 0) {
-      <p class="desk__status">{{ store.finalWorking() ? 'Still reading this list.' : 'No approved name in this list yet.' }}</p>
-    } @else {
-      <div class="algo__scroll">
-        <table class="algo__table">
-          <thead>
-            <tr>
-              <th>Symbol</th>
-              <th>Call</th>
-              <th>Entry</th>
-              <th>Stop</th>
-              <th>Target</th>
-              <th>Last</th>
-              <th>Size</th>
-              <th>Reason</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (row of store.finalByBook()[grid.id]; track row.symbol) {
-              <tr>
-                <td><strong class="algo__symbol">{{ row.symbol }}</strong></td>
-                <td>{{ row.call }}</td>
-                <td>{{ row.entry | number:'1.2-2' }}</td>
-                <td>{{ row.stop | number:'1.2-2' }}</td>
-                <td>{{ row.target | number:'1.2-2' }}</td>
-                <td>{{ row.lastClose | number:'1.2-2' }}</td>
-                <td>{{ row.quantityLabel }}</td>
-                <td>{{ row.reason }}</td>
-              </tr>
+  <div class="algo__books">
+    @for (grid of grids; track grid.id) {
+      <div class="algo__book" [attr.aria-labelledby]="'final-' + grid.id">
+        <h3 class="algo__table-title" [id]="'final-' + grid.id">{{ grid.title }}</h3>
+        @if (store.finalByBook()[grid.id].length === 0) {
+          <p class="algo__book-empty">{{ store.finalWorking() ? 'Still reading this list.' : 'No approved name in this list yet.' }}</p>
+        } @else {
+          <div class="algo__scroll">
+            <table class="algo__table">
+              <thead>
+                <tr>
+                  <th>Symbol</th>
+                  <th>Call</th>
+                  <th>Entry</th>
+                  <th>Stop</th>
+                  <th>Target</th>
+                  <th>Last</th>
+                  <th>Size</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of store.finalByBook()[grid.id]; track row.symbol) {
+                  <tr>
+                    <td><strong class="algo__symbol">{{ row.symbol }}</strong></td>
+                    <td>{{ row.call }}</td>
+                    <td>{{ row.entry | number:'1.2-2' }}</td>
+                    <td>{{ row.stop | number:'1.2-2' }}</td>
+                    <td>{{ row.target | number:'1.2-2' }}</td>
+                    <td>{{ row.lastClose | number:'1.2-2' }}</td>
+                    <td>{{ row.quantityLabel }}</td>
+                    <td>{{ row.reason }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+        @if (store.sellByBook()[grid.id].length > 0) {
+          <ul class="algo__summary">
+            @for (row of store.sellByBook()[grid.id]; track row.symbol) {
+              <li><strong>{{ row.symbol }}</strong> {{ row.reason }}</li>
             }
-          </tbody>
-        </table>
+          </ul>
+        }
       </div>
     }
-    @if (store.sellByBook()[grid.id].length > 0) {
-      <ul class="algo__summary">
-        @for (row of store.sellByBook()[grid.id]; track row.symbol) {
-          <li><strong>{{ row.symbol }}</strong> {{ row.reason }}</li>
-        }
-      </ul>
-    }
-  }
+  </div>
 </section>
