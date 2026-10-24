@@ -126,6 +126,27 @@
   font-size: 0.9rem;
 }
 
+.final-live__remain {
+  margin: 0 0 0.55rem;
+  color: var(--jw-text-muted);
+  font-size: 0.95rem;
+}
+
+.final-live__track {
+  height: 0.4rem;
+  margin: 0 0 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.final-live__track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--jw-cyan);
+}
+
 @media (max-width: 900px) {
   .algo__steps {
     grid-template-columns: 1fr;

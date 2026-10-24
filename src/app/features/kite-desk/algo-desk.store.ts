@@ -76,7 +76,7 @@ export class AlgoDeskStore implements OnDestroy {
   readonly finalWorking = signal(false);
   readonly finalPaused = signal(false);
   readonly scanBusy = signal(false);
-  readonly scanProgress = signal<{ done: number; total: number; label: string } | null>(null);
+  readonly scanProgress = signal<{ done: number; total: number; label: string; remainingPercent: number } | null>(null);
   readonly crossoverSignals = signal<{ symbol: string; company_name: string; crossover_type: string }[]>([]);
   readonly livePrices = signal<ReadonlyMap<number, number>>(new Map());
   readonly snapshotPrices = signal<ReadonlyMap<string, number>>(new Map());
@@ -319,7 +319,16 @@ export class AlgoDeskStore implements OnDestroy {
     this.finalByBook.set(groupBooks(buys));
     this.sellByBook.set(groupBooks(sells));
     this.finalActivity.set(result.activity ?? []);
-    this.scanProgress.set(result.progress && result.progress.total > 0 ? result.progress : null);
+    const progress = result.progress && result.progress.total > 0 ? result.progress : null;
+    const remaining = progress == null
+      ? 0
+      : progress.remaining_percent ?? Math.round(Math.max(progress.total - progress.done, 0) * 100 / progress.total);
+    this.scanProgress.set(progress == null ? null : {
+      done: progress.done,
+      total: progress.total,
+      label: progress.label,
+      remainingPercent: remaining,
+    });
     this.finalPaused.set(result.paused === true);
     const working = result.paused !== true && (result.working === true || (result.working == null && !!result.universe_note));
     this.finalWorking.set(working);

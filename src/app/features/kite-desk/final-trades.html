@@ -50,10 +50,16 @@
     <div class="final-live" aria-live="polite">
       <p class="final-live__title">Right now</p>
       @if (store.scanProgress(); as progress) {
-        <p class="final-live__count">
-          <strong>{{ progress.done | number }}</strong>
-          <span>of {{ progress.total | number }} {{ progress.label }} scanned</span>
-        </p>
+        <div class="final-live__meter">
+          <p class="final-live__count">
+            <strong>{{ progress.done | number }}</strong>
+            <span>of {{ progress.total | number }} {{ progress.label }} scanned</span>
+          </p>
+          <p class="final-live__remain">{{ progress.remainingPercent }}% remaining</p>
+          <div class="final-live__track" role="progressbar" [attr.aria-valuenow]="progress.done" [attr.aria-valuemin]="0" [attr.aria-valuemax]="progress.total" [attr.aria-label]="progress.done + ' of ' + progress.total + ' scanned'">
+            <span [style.width.%]="100 - progress.remainingPercent"></span>
+          </div>
+        </div>
       }
       @for (line of store.finalActivity(); track line.text) {
         <p class="final-live__note" [class.final-live__note--now]="line.state === 'active'">
