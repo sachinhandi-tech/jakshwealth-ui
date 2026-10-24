@@ -76,7 +76,7 @@ export class AlgoDeskStore implements OnDestroy {
   readonly finalWorking = signal(false);
   readonly finalPaused = signal(false);
   readonly scanBusy = signal(false);
-  readonly scanProgress = signal<{ done: number; total: number; label: string; remainingPercent: number } | null>(null);
+  readonly scanProgress = signal<{ done: number; total: number; label: string; action: string; remainingPercent: number } | null>(null);
   readonly crossoverSignals = signal<{ symbol: string; company_name: string; crossover_type: string }[]>([]);
   readonly livePrices = signal<ReadonlyMap<number, number>>(new Map());
   readonly snapshotPrices = signal<ReadonlyMap<string, number>>(new Map());
@@ -327,6 +327,7 @@ export class AlgoDeskStore implements OnDestroy {
       done: progress.done,
       total: progress.total,
       label: progress.label,
+      action: progress.action || 'scanned',
       remainingPercent: remaining,
     });
     this.finalPaused.set(result.paused === true);

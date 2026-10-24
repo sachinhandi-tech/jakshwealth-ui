@@ -129,7 +129,7 @@ export interface AlgoSetupResult {
   universe_note?: string;
   working?: boolean;
   paused?: boolean;
-  progress?: { done: number; total: number; label: string; remaining_percent?: number } | null;
+  progress?: { done: number; total: number; label: string; action?: string; remaining_percent?: number } | null;
   activity?: FinalActivity[];
 }
 

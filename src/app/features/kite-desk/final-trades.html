@@ -53,10 +53,10 @@
         <div class="final-live__meter">
           <p class="final-live__count">
             <strong>{{ progress.done | number }}</strong>
-            <span>of {{ progress.total | number }} {{ progress.label }} scanned</span>
+            <span>of {{ progress.total | number }} {{ progress.label }} {{ progress.action }}</span>
           </p>
           <p class="final-live__remain">{{ progress.remainingPercent }}% remaining</p>
-          <div class="final-live__track" role="progressbar" [attr.aria-valuenow]="progress.done" [attr.aria-valuemin]="0" [attr.aria-valuemax]="progress.total" [attr.aria-label]="progress.done + ' of ' + progress.total + ' scanned'">
+          <div class="final-live__track" role="progressbar" [attr.aria-valuenow]="progress.done" [attr.aria-valuemin]="0" [attr.aria-valuemax]="progress.total" [attr.aria-label]="progress.done + ' of ' + progress.total + ' ' + progress.action">
             <span [style.width.%]="100 - progress.remainingPercent"></span>
           </div>
         </div>
