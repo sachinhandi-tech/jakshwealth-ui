@@ -70,42 +70,6 @@
         </section>
       }
     }
-    @case ('market') {
-      <section class="jw-glass-card desk__panel">
-        <div class="desk__panel-head">
-          <h2>NSE quotes</h2>
-          <button type="button" class="jw-btn jw-btn--ghost" (click)="loadQuotes()" [disabled]="quotesLoading()">
-            {{ quotesLoading() ? 'Refreshing…' : 'Refresh' }}
-          </button>
-        </div>
-        @if (quoteError()) {
-          <p class="desk__alert" role="alert">{{ quoteError() }}</p>
-        }
-        @if (quotes().length === 0 && !quoteError()) {
-          <p class="desk__status">{{ quotesLoading() ? 'Loading quotes…' : 'No quotes yet.' }}</p>
-        }
-        @if (quotes().length > 0) {
-          <div class="desk__table" role="table" aria-label="Live quotes">
-            <div class="desk__row desk__row--head" role="row">
-              <span role="columnheader">Symbol</span>
-              <span role="columnheader">Last</span>
-              <span role="columnheader">Change</span>
-              <span role="columnheader">Volume</span>
-            </div>
-            @for (quote of quotes(); track quote.symbol) {
-              <div class="desk__row" role="row">
-                <span role="cell"><strong>{{ quote.symbol }}</strong> <em>{{ quote.exchange }}</em></span>
-                <span role="cell">{{ quote.last_price ?? '—' }}</span>
-                <span role="cell" [class.desk__up]="(quote.change_percent ?? 0) > 0" [class.desk__down]="(quote.change_percent ?? 0) < 0">
-                  {{ quote.change_percent === null ? '—' : (quote.change_percent + '%') }}
-                </span>
-                <span role="cell">{{ quote.volume ?? '—' }}</span>
-              </div>
-            }
-          </div>
-        }
-      </section>
-    }
     @case ('signals') {
       <section class="jw-glass-card desk__panel">
         <div class="desk__panel-head">

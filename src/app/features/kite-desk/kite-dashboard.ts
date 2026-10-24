@@ -9,7 +9,6 @@ import {
   KiteDeskTab,
   KiteDeskTabItem,
   KiteProfile,
-  KiteQuote,
   KiteSignal,
   KiteSignalResult,
   MovingAverageType,
@@ -36,18 +35,14 @@ export class KiteDashboard implements OnDestroy {
 
   readonly tabs: KiteDeskTabItem[] = [
     { id: 'user', label: 'User' },
-    { id: 'market', label: 'Market' },
     { id: 'final', label: 'Final list' },
     { id: 'gtt', label: 'GTT Placement' },
   ];
 
   readonly activeTab = signal<KiteDeskTab>('user');
   readonly profile = signal<KiteProfile | null>(null);
-  readonly quotes = signal<KiteQuote[]>([]);
   readonly profileError = signal<string | null>(null);
-  readonly quoteError = signal<string | null>(null);
   readonly profileLoading = signal(true);
-  readonly quotesLoading = signal(false);
   readonly scanAllNse = signal(false);
   readonly horizonKinds: SignalHorizon[] = ['short', 'long'];
   readonly activeHorizon = signal<SignalHorizon>('short');
@@ -100,24 +95,6 @@ export class KiteDashboard implements OnDestroy {
       this.publishCrossovers();
     }
     this.activeTab.set(tab);
-    if (tab === 'market' && this.quotes().length === 0 && !this.quotesLoading()) {
-      this.loadQuotes();
-    }
-  }
-
-  loadQuotes(): void {
-    this.quotesLoading.set(true);
-    this.quoteError.set(null);
-    this.kite.quotes().subscribe({
-      next: rows => {
-        this.quotes.set(rows);
-        this.quotesLoading.set(false);
-      },
-      error: err => {
-        this.quotesLoading.set(false);
-        this.quoteError.set(readError(err));
-      },
-    });
   }
 
   private shortTermRequest() {

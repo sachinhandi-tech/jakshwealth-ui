@@ -2,7 +2,7 @@
   <div class="algo__head">
     <div>
       <h2 id="final-trades-title">Final list</h2>
-      <p class="algo__note">The backend reads cash equities, stock futures, the nearest stock-option expiry, and commodity futures. Only a name that passed the moving-average crossover, the price and volume expansion, and the RSI momentum and ATR screen is sent to the model. The model then reads filings, news, and lawsuits. Run Live places a Zerodha buy GTT only for an approved buy. A sell call is not sent as an order.</p>
+      <p class="algo__note">The backend reads NSE equities and front-month commodity futures. Only a name that passed the moving-average crossover, the price and volume expansion, and the RSI momentum and ATR screen is sent to the model. The model then reads filings, news, and lawsuits. Run Live places a Zerodha buy GTT only for an approved buy. A sell call is not sent as an order.</p>
     </div>
     <div class="algo__actions">
       <button type="button" class="jw-btn" (click)="toggleScan()" [disabled]="store.scanBusy()">

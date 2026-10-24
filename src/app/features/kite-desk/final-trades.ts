@@ -14,8 +14,6 @@ export class FinalTrades {
   readonly store = inject(AlgoDeskStore);
   readonly grids = [
     { id: 'equity', title: 'Equity' },
-    { id: 'stock_future', title: 'Stock futures' },
-    { id: 'stock_option', title: 'Stock options' },
     { id: 'commodity_future', title: 'Commodity futures' },
   ];
 

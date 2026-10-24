@@ -126,6 +126,7 @@ describe('final list tab', () => {
     fixture.detectChanges();
     const labels = [...fixture.nativeElement.querySelectorAll('.desk__tab')].map(item => item.textContent?.trim());
     expect(labels).toContain('Final list');
+    expect(labels).not.toContain('Market');
     expect(labels).not.toContain('ma-crossover');
     expect(labels).not.toContain('price-volume-expansion');
     const finalButton = [...fixture.nativeElement.querySelectorAll('button')].find(item =>
@@ -140,8 +141,8 @@ describe('final list tab', () => {
     expect(fixture.nativeElement.textContent).toContain('Reading NSE and BSE equities.');
     expect(fixture.nativeElement.textContent).toContain('No stock was approved for a trade.');
     expect(fixture.nativeElement.textContent).toContain('Equity');
-    expect(fixture.nativeElement.textContent).toContain('Stock futures');
-    expect(fixture.nativeElement.textContent).toContain('Stock options');
     expect(fixture.nativeElement.textContent).toContain('Commodity futures');
+    expect(fixture.nativeElement.textContent).not.toContain('Stock futures');
+    expect(fixture.nativeElement.textContent).not.toContain('Stock options');
   });
 });
