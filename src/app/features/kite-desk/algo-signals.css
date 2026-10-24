@@ -147,8 +147,21 @@
 .final-live {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
-  margin: 0.9rem 0 1rem;
+  gap: 0.55rem;
+  margin: 1.15rem 0 0.4rem;
+  padding: 1rem 1.05rem 1.1rem;
+  border: 1px solid rgba(0, 212, 255, 0.22);
+  border-radius: 16px;
+  background: rgba(0, 212, 255, 0.04);
+}
+
+.final-live__title {
+  margin: 0 0 0.15rem;
+  color: var(--jw-text-dim);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .final-live__note {

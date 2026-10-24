@@ -22,6 +22,7 @@
 
   @if (store.finalActivity().length > 0) {
     <div class="final-live" aria-live="polite">
+      <p class="final-live__title">Right now</p>
       @for (line of store.finalActivity(); track line.text) {
         <p class="final-live__note" [class.final-live__note--now]="line.state === 'active'">
           <span class="final-live__mark" aria-hidden="true"></span>
