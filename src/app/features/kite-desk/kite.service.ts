@@ -108,8 +108,8 @@ export class KiteService {
     });
   }
 
-  algoSetups(stocks: unknown[]): Observable<AlgoSetupResult> {
-    return this.http.post<AlgoSetupResult>(`${currentKiteApiBase()}/algo/setups`, { stocks }, {
+  algoSetups(stocks: unknown[], signals: unknown[] = []): Observable<AlgoSetupResult> {
+    return this.http.post<AlgoSetupResult>(`${currentKiteApiBase()}/algo/setups`, { stocks, signals }, {
       headers: this.deskHeaders(),
     });
   }

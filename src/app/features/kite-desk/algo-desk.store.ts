@@ -66,6 +66,7 @@ export class AlgoDeskStore implements OnDestroy {
   readonly finalLoading = signal(false);
   readonly finalError = signal<string | null>(null);
   readonly finalNote = signal('');
+  readonly crossoverSignals = signal<{ symbol: string; company_name: string; crossover_type: string }[]>([]);
   readonly livePrices = signal<ReadonlyMap<number, number>>(new Map());
   readonly snapshotPrices = signal<ReadonlyMap<string, number>>(new Map());
   private readonly gttResults = signal<ReadonlyMap<string, GttOrderResult>>(new Map());
@@ -87,6 +88,10 @@ export class AlgoDeskStore implements OnDestroy {
     this.stopped = true;
     this.stopFill();
     this.closeTicks();
+  }
+
+  setCrossoverSignals(rows: { symbol: string; company_name: string; crossover_type: string }[]): void {
+    this.crossoverSignals.set(rows);
   }
 
   stopFill(): void {
@@ -153,13 +158,8 @@ export class AlgoDeskStore implements OnDestroy {
         instrument_type: 'EQ',
         candles: setup.candles,
       }));
-      if (stocks.length === 0) {
-        this.finalTrades.set([]);
-        this.sellCalls.set([]);
-        this.finalNote.set('No breakout is waiting for a final call.');
-        return;
-      }
-      const result = await firstValueFrom(this.kite.algoSetups(stocks));
+      const signals = this.crossoverSignals();
+      const result = await firstValueFrom(this.kite.algoSetups(stocks, signals));
       this.applyFinal(result);
     } catch (err) {
       this.finalError.set(readError(err));

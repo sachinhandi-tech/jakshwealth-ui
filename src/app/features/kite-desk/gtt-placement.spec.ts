@@ -114,12 +114,12 @@ describe('GTT Placement', () => {
     return { placement, signals, trades };
   }
 
-  it('renders read-only placement rows from Algo Signals and has no placement button', async () => {
+  it('renders read-only placement rows from price-volume-expansion and has no placement button', async () => {
     const { placement, signals, trades } = await setup([], []);
     const text = placement.nativeElement.textContent as string;
     expect(text).toContain('GTT Order Placement');
     expect(text).toContain('Kite GTT Placement');
-    expect(text).toContain('Read-only status from Algo Signals');
+    expect(text).toContain('Read-only status from price-volume-expansion');
     expect(text).toContain('INFY');
     expect(text).toContain('TCS');
     expect(placement.nativeElement.querySelector('button')).toBeNull();

@@ -32,12 +32,13 @@ import { KiteService } from './kite.service';
 export class KiteDashboard implements OnDestroy {
   private readonly kite = inject(KiteService);
   private readonly router = inject(Router);
+  private readonly algoStore = inject(AlgoDeskStore);
 
   readonly tabs: KiteDeskTabItem[] = [
     { id: 'user', label: 'User' },
     { id: 'market', label: 'Market' },
-    { id: 'signals', label: 'Signals' },
-    { id: 'algo', label: 'Algo Signals' },
+    { id: 'signals', label: 'ma-crossover' },
+    { id: 'algo', label: 'price-volume-expansion' },
     { id: 'final', label: 'Final list' },
     { id: 'gtt', label: 'GTT Placement' },
   ];
@@ -93,6 +94,9 @@ export class KiteDashboard implements OnDestroy {
   }
 
   selectTab(tab: KiteDeskTab): void {
+    if (tab === 'final') {
+      this.publishCrossovers();
+    }
     this.activeTab.set(tab);
     if (tab === 'market' && this.quotes().length === 0 && !this.quotesLoading()) {
       this.loadQuotes();
@@ -175,6 +179,7 @@ export class KiteDashboard implements OnDestroy {
             this.scanLoading.update(current => ({ ...current, [kind]: false }));
             if (item.status === 'done' && item.result) {
               this.scanResult.update(current => ({ ...current, [kind]: item.result }));
+              this.publishCrossovers();
               return;
             }
             this.scanError.update(current => ({
@@ -196,6 +201,20 @@ export class KiteDashboard implements OnDestroy {
     if (err?.status === 401) {
       void this.router.navigate(['/kite/login']);
     }
+  }
+
+  private publishCrossovers(): void {
+    const rows: { symbol: string; company_name: string; crossover_type: string }[] = [];
+    for (const kind of this.horizonKinds) {
+      for (const row of this.scanResult()[kind]?.signals ?? []) {
+        rows.push({
+          symbol: row.ticker,
+          company_name: row.company,
+          crossover_type: row.crossover_type,
+        });
+      }
+    }
+    this.algoStore.setCrossoverSignals(rows);
   }
 
   signalColumns(kind: SignalHorizon, result: KiteSignalResult): { key: SignalSortKey; label: string }[] {

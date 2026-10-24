@@ -73,7 +73,7 @@ describe('KiteDashboard signals', () => {
   });
 
   function openSignals(): void {
-    clickButton('Signals');
+    clickButton('ma-crossover');
   }
 
   function clickButton(label: string): void {

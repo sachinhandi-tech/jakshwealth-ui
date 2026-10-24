@@ -93,7 +93,7 @@ describe('AlgoSignals', () => {
   });
 });
 
-describe('Algo Signals tab', () => {
+describe('price-volume-expansion tab', () => {
   it('opens from the dashboard navigation', async () => {
     TestBed.configureTestingModule({
       imports: [KiteDashboard],
@@ -108,6 +108,7 @@ describe('Algo Signals tab', () => {
             quotes: () => of([]),
             scannerData: () => of({ stocks: [] }),
             ohlcSnapshot: () => of({ quotes: [] }),
+            algoSetups: () => of({ scanned: 0, accepted: 0, setups: [], sell_calls: [] }),
             openTicks: () => new FakeSocket() as unknown as WebSocket,
           },
         },
@@ -116,7 +117,7 @@ describe('Algo Signals tab', () => {
     const fixture = TestBed.createComponent(KiteDashboard);
     fixture.detectChanges();
     const button = [...fixture.nativeElement.querySelectorAll('button')].find(item =>
-      item.textContent?.includes('Algo Signals'),
+      item.textContent?.includes('price-volume-expansion'),
     ) as HTMLButtonElement;
     button.click();
     fixture.detectChanges();
@@ -133,6 +134,6 @@ describe('Algo Signals tab', () => {
     await fixture.whenStable();
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Run Live');
-    expect(fixture.nativeElement.textContent).toContain('No breakout is waiting for a final call.');
+    expect(fixture.nativeElement.textContent).toContain('No stock was approved for a trade.');
   });
 });
