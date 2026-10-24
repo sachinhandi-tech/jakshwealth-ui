@@ -37,8 +37,6 @@ export class KiteDashboard implements OnDestroy {
   readonly tabs: KiteDeskTabItem[] = [
     { id: 'user', label: 'User' },
     { id: 'market', label: 'Market' },
-    { id: 'signals', label: 'ma-crossover' },
-    { id: 'algo', label: 'price-volume-expansion' },
     { id: 'final', label: 'Final list' },
     { id: 'gtt', label: 'GTT Placement' },
   ];

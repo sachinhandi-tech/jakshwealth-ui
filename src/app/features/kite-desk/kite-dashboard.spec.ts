@@ -76,7 +76,8 @@ describe('KiteDashboard signals', () => {
   });
 
   function openSignals(): void {
-    clickButton('ma-crossover');
+    fixture.componentInstance.activeTab.set('signals');
+    fixture.detectChanges();
   }
 
   function clickButton(label: string): void {

@@ -47,6 +47,8 @@ export interface FinalTrade {
 export class AlgoDeskStore implements OnDestroy {
   private readonly kite = inject(KiteService);
   private socket: WebSocket | null = null;
+  private universeTimer: ReturnType<typeof setTimeout> | null = null;
+  private universePolls = 0;
   private scanSub: Subscription | null = null;
   private loaded = false;
   private stopped = false;
@@ -88,6 +90,10 @@ export class AlgoDeskStore implements OnDestroy {
     this.stopped = true;
     this.stopFill();
     this.closeTicks();
+    if (this.universeTimer !== null) {
+      clearTimeout(this.universeTimer);
+      this.universeTimer = null;
+    }
   }
 
   setCrossoverSignals(rows: { symbol: string; company_name: string; crossover_type: string }[]): void {
@@ -145,21 +151,7 @@ export class AlgoDeskStore implements OnDestroy {
     this.finalLoading.set(true);
     this.finalError.set(null);
     try {
-      if (!this.loaded) {
-        await this.reload();
-      }
-      if (this.error()) {
-        return;
-      }
-      const stocks = this.setups().map(setup => ({
-        symbol: setup.symbol,
-        company_name: setup.companyName,
-        exchange: 'NSE',
-        instrument_type: 'EQ',
-        candles: setup.candles,
-      }));
-      const signals = this.crossoverSignals();
-      const result = await firstValueFrom(this.kite.algoSetups(stocks, signals));
+      const result = await firstValueFrom(this.kite.algoSetups([], []));
       this.applyFinal(result);
     } catch (err) {
       this.finalError.set(readError(err));
@@ -286,9 +278,20 @@ export class AlgoDeskStore implements OnDestroy {
       .map(row => toFinal(row, 'sell'));
     this.finalTrades.set(buys);
     this.sellCalls.set(sells);
+    if (!result.universe_note) {
+      this.universePolls = 0;
+    } else if (this.universePolls < 60 && this.universeTimer === null) {
+      this.universePolls += 1;
+      this.universeTimer = setTimeout(() => {
+        this.universeTimer = null;
+        if (!this.stopped) {
+          void this.refreshFinal();
+        }
+      }, 30000);
+    }
     if (buys.length === 0) {
       const stoodAside = (result.setups ?? []).find(row => row.ai_reason);
-      this.finalNote.set(stoodAside?.ai_reason || 'No stock was approved for a trade.');
+      this.finalNote.set(result.universe_note || stoodAside?.ai_reason || 'No stock was approved for a trade.');
       return;
     }
     this.finalNote.set('');

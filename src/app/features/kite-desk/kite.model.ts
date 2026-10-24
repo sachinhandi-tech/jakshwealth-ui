@@ -120,6 +120,7 @@ export interface AlgoSetupResult {
   accepted: number;
   setups: AlgoSetupRow[];
   sell_calls?: AlgoSetupRow[];
+  universe_note?: string;
 }
 
 export interface GttOrderResult {

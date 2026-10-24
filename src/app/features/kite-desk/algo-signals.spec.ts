@@ -93,8 +93,8 @@ describe('AlgoSignals', () => {
   });
 });
 
-describe('price-volume-expansion tab', () => {
-  it('opens from the dashboard navigation', async () => {
+describe('final list tab', () => {
+  it('opens from the dashboard and does not ask for the strategy tabs', async () => {
     TestBed.configureTestingModule({
       imports: [KiteDashboard],
       providers: [
@@ -106,6 +106,7 @@ describe('price-volume-expansion tab', () => {
             profile: () => of({ user_name: 'Desk', user_id: 'AB1234', products: [], exchanges: [] }),
             logout: () => of({ authenticated: false, user_name: null, user_id: null }),
             quotes: () => of([]),
+            latestScans: () => of({ short: null, long: null }),
             scannerData: () => of({ stocks: [] }),
             ohlcSnapshot: () => of({ quotes: [] }),
             algoSetups: () => of({ scanned: 0, accepted: 0, setups: [], sell_calls: [] }),
@@ -116,16 +117,10 @@ describe('price-volume-expansion tab', () => {
     });
     const fixture = TestBed.createComponent(KiteDashboard);
     fixture.detectChanges();
-    const button = [...fixture.nativeElement.querySelectorAll('button')].find(item =>
-      item.textContent?.includes('price-volume-expansion'),
-    ) as HTMLButtonElement;
-    button.click();
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('High-volume breakout and retest setups');
-    expect(fixture.nativeElement.textContent).toContain('No breakout retest setups match the current parameters.');
-    expect(fixture.nativeElement.textContent).not.toContain('Run Live');
+    const labels = [...fixture.nativeElement.querySelectorAll('.desk__tab')].map(item => item.textContent?.trim());
+    expect(labels).toContain('Final list');
+    expect(labels).not.toContain('ma-crossover');
+    expect(labels).not.toContain('price-volume-expansion');
     const finalButton = [...fixture.nativeElement.querySelectorAll('button')].find(item =>
       item.textContent?.includes('Final list'),
     ) as HTMLButtonElement;
