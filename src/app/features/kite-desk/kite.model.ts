@@ -115,12 +115,19 @@ export interface AlgoSetupRow {
   reason?: string;
 }
 
+export interface FinalActivity {
+  text: string;
+  state?: string;
+}
+
 export interface AlgoSetupResult {
   scanned: number;
   accepted: number;
   setups: AlgoSetupRow[];
   sell_calls?: AlgoSetupRow[];
   universe_note?: string;
+  working?: boolean;
+  activity?: FinalActivity[];
 }
 
 export interface GttOrderResult {

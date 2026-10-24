@@ -15,11 +15,19 @@
     <p class="desk__alert" role="alert">{{ message }}</p>
   }
 
-  @if (store.finalLoading() || store.loading()) {
-    <p class="desk__status">Building the final list…</p>
-  } @else if (store.finalTrades().length === 0) {
+  @if (store.finalActivity().length > 0) {
+    <div class="final-live" aria-live="polite">
+      @for (line of store.finalActivity(); track line.text) {
+        <p class="final-live__note" [class.final-live__note--now]="line.state === 'active'">
+          <span class="final-live__mark" aria-hidden="true"></span>
+          {{ line.text }}
+        </p>
+      }
+    </div>
+  }
+  @if (store.finalTrades().length === 0 && !store.finalWorking()) {
     <p class="desk__status">{{ store.finalNote() || 'No stock was approved for a trade.' }}</p>
-  } @else {
+  } @else if (store.finalTrades().length > 0) {
     <div class="algo__scroll">
       <table class="algo__table">
         <thead>

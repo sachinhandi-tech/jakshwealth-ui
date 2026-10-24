@@ -109,7 +109,14 @@ describe('final list tab', () => {
             latestScans: () => of({ short: null, long: null }),
             scannerData: () => of({ stocks: [] }),
             ohlcSnapshot: () => of({ quotes: [] }),
-            algoSetups: () => of({ scanned: 0, accepted: 0, setups: [], sell_calls: [] }),
+            algoSetups: () => of({
+              scanned: 0,
+              accepted: 0,
+              setups: [],
+              sell_calls: [],
+              working: false,
+              activity: [{ text: 'Reading NSE and BSE equities.', state: 'done' }],
+            }),
             openTicks: () => new FakeSocket() as unknown as WebSocket,
           },
         },
@@ -129,6 +136,7 @@ describe('final list tab', () => {
     await fixture.whenStable();
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Run Live');
+    expect(fixture.nativeElement.textContent).toContain('Reading NSE and BSE equities.');
     expect(fixture.nativeElement.textContent).toContain('No stock was approved for a trade.');
   });
 });

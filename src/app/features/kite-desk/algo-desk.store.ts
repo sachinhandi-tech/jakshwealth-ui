@@ -5,6 +5,7 @@ import { BreakoutSetup, readStocks, scanBreakouts } from './algo-scanner';
 import {
   AlgoSetupResult,
   AlgoSetupRow,
+  FinalActivity,
   GttOrderRequest,
   GttOrderResult,
 } from './kite.model';
@@ -68,6 +69,8 @@ export class AlgoDeskStore implements OnDestroy {
   readonly finalLoading = signal(false);
   readonly finalError = signal<string | null>(null);
   readonly finalNote = signal('');
+  readonly finalActivity = signal<FinalActivity[]>([]);
+  readonly finalWorking = signal(false);
   readonly crossoverSignals = signal<{ symbol: string; company_name: string; crossover_type: string }[]>([]);
   readonly livePrices = signal<ReadonlyMap<number, number>>(new Map());
   readonly snapshotPrices = signal<ReadonlyMap<string, number>>(new Map());
@@ -147,16 +150,26 @@ export class AlgoDeskStore implements OnDestroy {
     }
   }
 
-  async refreshFinal(): Promise<void> {
-    this.finalLoading.set(true);
-    this.finalError.set(null);
+  async refreshFinal(quiet = false): Promise<void> {
+    if (!quiet) {
+      this.finalError.set(null);
+      if (this.finalActivity().length === 0) {
+        this.finalActivity.set([{ text: 'Opening the NSE and BSE equity read.', state: 'active' }]);
+        this.finalWorking.set(true);
+      }
+    }
     try {
       const result = await firstValueFrom(this.kite.algoSetups([], []));
       this.applyFinal(result);
     } catch (err) {
+      if (isGatewayWait(err)) {
+        this.finalError.set(null);
+        this.finalWorking.set(true);
+        this.finalActivity.set([{ text: 'The desk is still reading. Checking again.', state: 'active' }]);
+        this.scheduleFinal(true);
+        return;
+      }
       this.finalError.set(readError(err));
-    } finally {
-      this.finalLoading.set(false);
     }
   }
 
@@ -278,23 +291,33 @@ export class AlgoDeskStore implements OnDestroy {
       .map(row => toFinal(row, 'sell'));
     this.finalTrades.set(buys);
     this.sellCalls.set(sells);
-    if (!result.universe_note) {
-      this.universePolls = 0;
-    } else if (this.universePolls < 60 && this.universeTimer === null) {
-      this.universePolls += 1;
-      this.universeTimer = setTimeout(() => {
-        this.universeTimer = null;
-        if (!this.stopped) {
-          void this.refreshFinal();
-        }
-      }, 30000);
-    }
+    this.finalActivity.set(result.activity ?? []);
+    const working = result.working === true || (result.working == null && !!result.universe_note);
+    this.finalWorking.set(working);
+    this.scheduleFinal(working);
     if (buys.length === 0) {
       const stoodAside = (result.setups ?? []).find(row => row.ai_reason);
       this.finalNote.set(result.universe_note || stoodAside?.ai_reason || 'No stock was approved for a trade.');
       return;
     }
     this.finalNote.set('');
+  }
+
+  private scheduleFinal(working: boolean): void {
+    if (!working) {
+      this.universePolls = 0;
+      return;
+    }
+    if (this.universePolls >= 450 || this.universeTimer !== null) {
+      return;
+    }
+    this.universePolls += 1;
+    this.universeTimer = setTimeout(() => {
+      this.universeTimer = null;
+      if (!this.stopped) {
+        void this.refreshFinal(true);
+      }
+    }, 5000);
   }
 
   private toOrder(row: FinalTrade): GttOrderRequest {
@@ -501,6 +524,11 @@ function scannerMeta(payload: unknown): { scanned?: number; universe?: number; c
     universe: typeof row.universe === 'number' ? row.universe : undefined,
     complete: typeof row.complete === 'boolean' ? row.complete : undefined,
   };
+}
+
+function isGatewayWait(err: unknown): boolean {
+  const status = (err as { status?: number })?.status;
+  return status === 502 || status === 504 || status === 0;
 }
 
 function readError(err: unknown): string {
