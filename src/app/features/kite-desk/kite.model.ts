@@ -112,6 +112,7 @@ export interface AlgoSetupRow {
   last_close?: number;
   quantity?: number | null;
   quantity_basis?: string;
+  segment?: string;
   reason?: string;
 }
 

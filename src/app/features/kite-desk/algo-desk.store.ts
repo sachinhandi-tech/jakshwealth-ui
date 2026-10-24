@@ -42,6 +42,7 @@ export interface FinalTrade {
   reason: string;
   exchange: string;
   gttTradable: boolean;
+  segment: string;
 }
 
 @Injectable()
@@ -66,6 +67,8 @@ export class AlgoDeskStore implements OnDestroy {
   readonly gttError = signal<string | null>(null);
   readonly finalTrades = signal<FinalTrade[]>([]);
   readonly sellCalls = signal<FinalTrade[]>([]);
+  readonly finalByBook = signal<Record<string, FinalTrade[]>>(emptyBooks());
+  readonly sellByBook = signal<Record<string, FinalTrade[]>>(emptyBooks());
   readonly finalLoading = signal(false);
   readonly finalError = signal<string | null>(null);
   readonly finalNote = signal('');
@@ -291,6 +294,8 @@ export class AlgoDeskStore implements OnDestroy {
       .map(row => toFinal(row, 'sell'));
     this.finalTrades.set(buys);
     this.sellCalls.set(sells);
+    this.finalByBook.set(groupBooks(buys));
+    this.sellByBook.set(groupBooks(sells));
     this.finalActivity.set(result.activity ?? []);
     const working = result.working === true || (result.working == null && !!result.universe_note);
     this.finalWorking.set(working);
@@ -490,7 +495,21 @@ function toFinal(row: AlgoSetupRow, call: string): FinalTrade {
     reason: row.ai_reason || row.reason || '',
     exchange: row.exchange || 'NSE',
     gttTradable: row.gtt_tradable === true,
+    segment: row.segment || 'equity',
   };
+}
+
+function emptyBooks(): Record<string, FinalTrade[]> {
+  return { equity: [], stock_future: [], stock_option: [], commodity_future: [] };
+}
+
+function groupBooks(rows: FinalTrade[]): Record<string, FinalTrade[]> {
+  const books = emptyBooks();
+  for (const row of rows) {
+    const key = books[row.segment] ? row.segment : 'equity';
+    books[key].push(row);
+  }
+  return books;
 }
 
 function isReady(order: GttOrderResult): boolean {

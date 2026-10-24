@@ -138,5 +138,9 @@ describe('final list tab', () => {
     expect(fixture.nativeElement.textContent).toContain('Run Live');
     expect(fixture.nativeElement.textContent).toContain('Reading NSE and BSE equities.');
     expect(fixture.nativeElement.textContent).toContain('No stock was approved for a trade.');
+    expect(fixture.nativeElement.textContent).toContain('Equity');
+    expect(fixture.nativeElement.textContent).toContain('Stock futures');
+    expect(fixture.nativeElement.textContent).toContain('Stock options');
+    expect(fixture.nativeElement.textContent).toContain('Commodity futures');
   });
 });
