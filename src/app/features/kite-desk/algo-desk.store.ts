@@ -179,7 +179,7 @@ export class AlgoDeskStore implements OnDestroy {
     if (!quiet) {
       this.finalError.set(null);
       if (this.finalActivity().length === 0) {
-        this.finalActivity.set([{ text: 'Opening the NSE equity and commodity-future read.', state: 'active' }]);
+        this.finalActivity.set([{ text: 'Opening the NSE large, mid, and small cap read.', state: 'active' }]);
         this.finalWorking.set(true);
       }
     }
@@ -540,6 +540,9 @@ function emptyBooks(): Record<string, FinalTrade[]> {
 function groupBooks(rows: FinalTrade[]): Record<string, FinalTrade[]> {
   const books = emptyBooks();
   for (const row of rows) {
+    if (row.segment === 'commodity_future') {
+      continue;
+    }
     const key = books[row.segment] ? row.segment : 'equity';
     books[key].push(row);
   }

@@ -2,7 +2,7 @@
   <div class="algo__head">
     <div>
       <h2 id="final-trades-title">Final list</h2>
-      <p class="algo__note">NSE shares, and the nearest commodity future for each commodity. A name reaches this page only after every screen below has passed.</p>
+      <p class="algo__note">NSE large, mid, and small cap shares. A name reaches this page only after every screen below has passed.</p>
     </div>
     <div class="algo__actions">
       <button type="button" class="jw-btn" (click)="toggleScan()" [disabled]="store.scanBusy()">
@@ -37,7 +37,7 @@
       </div>
     </li>
   </ol>
-  <p class="algo__note algo__note--after">Run Live places one Zerodha buy GTT for each approved buy. A share is sized to one lakh rupees. A commodity future is one lot.</p>
+  <p class="algo__note algo__note--after">Run Live places one Zerodha buy GTT for each approved buy. A share is sized to one lakh rupees.</p>
 
   @if (store.gttError(); as message) {
     <p class="desk__alert" role="alert">{{ message }}</p>

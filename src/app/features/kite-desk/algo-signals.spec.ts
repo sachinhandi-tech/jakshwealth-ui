@@ -142,7 +142,8 @@ describe('final list tab', () => {
     expect(fixture.nativeElement.textContent).toContain('Reading NSE and BSE equities.');
     expect(fixture.nativeElement.textContent).toContain('No name has been approved for a trade yet.');
     expect(fixture.nativeElement.textContent).toContain('Equity');
-    expect(fixture.nativeElement.textContent).toContain('Commodity futures');
+    expect(fixture.nativeElement.textContent).toContain('large, mid, and small cap');
+    expect(fixture.nativeElement.textContent).not.toContain('Commodity');
     expect(fixture.nativeElement.textContent).not.toContain('Stock futures');
     expect(fixture.nativeElement.textContent).not.toContain('Stock options');
   });
