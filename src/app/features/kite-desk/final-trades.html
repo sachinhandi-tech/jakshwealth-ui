@@ -2,17 +2,43 @@
   <div class="algo__head">
     <div>
       <h2 id="final-trades-title">Final list</h2>
-      <p class="algo__note">The backend reads NSE equities and front-month commodity futures. Only a name that passed the moving-average crossover, the price and volume expansion, and the RSI momentum and ATR screen is sent to the model. The model then reads filings, news, and lawsuits. Run Live places a Zerodha buy GTT only for an approved buy. A sell call is not sent as an order.</p>
+      <p class="algo__note">NSE shares, and the nearest commodity future for each commodity. A name reaches this page only after every screen below has passed.</p>
     </div>
     <div class="algo__actions">
       <button type="button" class="jw-btn" (click)="toggleScan()" [disabled]="store.scanBusy()">
-        {{ store.finalWorking() && !store.finalPaused() ? 'Stop scan' : 'Continue scan' }}
+        {{ store.finalWorking() && !store.finalPaused() ? 'Stop scan' : 'Start from zero' }}
       </button>
       <button type="button" class="jw-btn jw-btn--primary" (click)="runLive()" [disabled]="store.running() || store.loading() || store.finalLoading()">
         {{ store.running() ? 'Running...' : 'Run Live' }}
       </button>
     </div>
   </div>
+
+  <ol class="algo__steps">
+    <li>
+      <span class="algo__step-label">1</span>
+      <div>
+        <h3>Price and volume</h3>
+        <p>The 20-day exponential average must cross above the 50-day simple average. Volume on the move must be at least three times the prior 20-day average.</p>
+      </div>
+    </li>
+    <li>
+      <span class="algo__step-label">2</span>
+      <div>
+        <h3>Risk and momentum</h3>
+        <p>RSI must sit between 50 and 70. The daily range must be between 1% and 4% of the price, and the name must be higher than it was 20 sessions ago. A name that fails any screen is left out.</p>
+      </div>
+    </li>
+    <li>
+      <span class="algo__step-label">3</span>
+      <div>
+        <h3>Filings, news, and lawsuits</h3>
+        <p>The model reads those sources and either approves a buy or stands aside. A sell is shown as a call. It is not sent as an order.</p>
+      </div>
+    </li>
+  </ol>
+  <p class="algo__note algo__note--after">Run Live places one Zerodha buy GTT for each approved buy. A share is sized to one lakh rupees. A commodity future is one lot.</p>
+
   @if (store.gttError(); as message) {
     <p class="desk__alert" role="alert">{{ message }}</p>
   }
@@ -20,9 +46,15 @@
     <p class="desk__alert" role="alert">{{ message }}</p>
   }
 
-  @if (store.finalActivity().length > 0) {
+  @if (store.scanProgress() || store.finalActivity().length > 0) {
     <div class="final-live" aria-live="polite">
       <p class="final-live__title">Right now</p>
+      @if (store.scanProgress(); as progress) {
+        <p class="final-live__count">
+          <strong>{{ progress.done | number }}</strong>
+          <span>of {{ progress.total | number }} {{ progress.label }} scanned</span>
+        </p>
+      }
       @for (line of store.finalActivity(); track line.text) {
         <p class="final-live__note" [class.final-live__note--now]="line.state === 'active'">
           <span class="final-live__mark" aria-hidden="true"></span>
@@ -31,8 +63,9 @@
       }
     </div>
   }
+
   @if (store.finalTrades().length === 0 && !store.finalWorking()) {
-    <p class="desk__status">{{ store.finalNote() || 'No stock was approved for a trade.' }}</p>
+    <p class="desk__status algo__empty">{{ store.finalNote() || 'No name has been approved for a trade yet.' }}</p>
   }
 
   <div class="algo__books">
@@ -40,7 +73,7 @@
       <div class="algo__book" [attr.aria-labelledby]="'final-' + grid.id">
         <h3 class="algo__table-title" [id]="'final-' + grid.id">{{ grid.title }}</h3>
         @if (store.finalByBook()[grid.id].length === 0) {
-          <p class="algo__book-empty">{{ store.finalWorking() ? 'Still reading this list.' : 'No approved name in this list yet.' }}</p>
+          <p class="algo__book-empty">{{ store.finalWorking() ? 'This list is still being read.' : 'No approved name in this list yet.' }}</p>
         } @else {
           <div class="algo__scroll">
             <table class="algo__table">
@@ -74,6 +107,7 @@
           </div>
         }
         @if (store.sellByBook()[grid.id].length > 0) {
+          <h4 class="algo__sell-title">Sell calls</h4>
           <ul class="algo__summary">
             @for (row of store.sellByBook()[grid.id]; track row.symbol) {
               <li><strong>{{ row.symbol }}</strong> {{ row.reason }}</li>

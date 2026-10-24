@@ -76,6 +76,7 @@ export class AlgoDeskStore implements OnDestroy {
   readonly finalWorking = signal(false);
   readonly finalPaused = signal(false);
   readonly scanBusy = signal(false);
+  readonly scanProgress = signal<{ done: number; total: number; label: string } | null>(null);
   readonly crossoverSignals = signal<{ symbol: string; company_name: string; crossover_type: string }[]>([]);
   readonly livePrices = signal<ReadonlyMap<number, number>>(new Map());
   readonly snapshotPrices = signal<ReadonlyMap<string, number>>(new Map());
@@ -163,7 +164,7 @@ export class AlgoDeskStore implements OnDestroy {
     this.scanBusy.set(true);
     this.finalError.set(null);
     try {
-      const result = await firstValueFrom(stopping ? this.kite.stopScan() : this.kite.continueScan());
+      const result = await firstValueFrom(stopping ? this.kite.stopScan() : this.kite.restartScan());
       this.applyFinal(result);
     } catch (err) {
       if (!isGatewayWait(err)) {
@@ -178,7 +179,7 @@ export class AlgoDeskStore implements OnDestroy {
     if (!quiet) {
       this.finalError.set(null);
       if (this.finalActivity().length === 0) {
-        this.finalActivity.set([{ text: 'Opening the NSE and BSE equity read.', state: 'active' }]);
+        this.finalActivity.set([{ text: 'Opening the NSE equity and commodity-future read.', state: 'active' }]);
         this.finalWorking.set(true);
       }
     }
@@ -318,13 +319,14 @@ export class AlgoDeskStore implements OnDestroy {
     this.finalByBook.set(groupBooks(buys));
     this.sellByBook.set(groupBooks(sells));
     this.finalActivity.set(result.activity ?? []);
+    this.scanProgress.set(result.progress && result.progress.total > 0 ? result.progress : null);
     this.finalPaused.set(result.paused === true);
     const working = result.paused !== true && (result.working === true || (result.working == null && !!result.universe_note));
     this.finalWorking.set(working);
     this.scheduleFinal(working);
     if (buys.length === 0) {
       const stoodAside = (result.setups ?? []).find(row => row.ai_reason);
-      this.finalNote.set(result.universe_note || stoodAside?.ai_reason || 'No stock was approved for a trade.');
+      this.finalNote.set(result.universe_note || stoodAside?.ai_reason || 'No name has been approved for a trade yet.');
       return;
     }
     this.finalNote.set('');

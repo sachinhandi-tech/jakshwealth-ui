@@ -137,9 +137,10 @@ describe('final list tab', () => {
     await fixture.whenStable();
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Run Live');
-    expect(fixture.nativeElement.textContent).toContain('Continue scan');
+    expect(fixture.nativeElement.textContent).toContain('Start from zero');
+    expect(fixture.nativeElement.textContent).toContain('Price and volume');
     expect(fixture.nativeElement.textContent).toContain('Reading NSE and BSE equities.');
-    expect(fixture.nativeElement.textContent).toContain('No stock was approved for a trade.');
+    expect(fixture.nativeElement.textContent).toContain('No name has been approved for a trade yet.');
     expect(fixture.nativeElement.textContent).toContain('Equity');
     expect(fixture.nativeElement.textContent).toContain('Commodity futures');
     expect(fixture.nativeElement.textContent).not.toContain('Stock futures');
