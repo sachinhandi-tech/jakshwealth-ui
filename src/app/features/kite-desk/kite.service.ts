@@ -10,6 +10,7 @@ import {
   KiteSessionStatus,
   KiteSignalJob,
   KiteSignalRequest,
+  KiteSignalResult,
   KiteSubscriber,
   AlgoSetupResult,
   GttOrderRequest,
@@ -75,6 +76,13 @@ export class KiteService {
     return this.http.get<KiteSignalJob>(`${currentKiteApiBase()}/signals/${jobId}`, {
       headers: this.deskHeaders(),
     });
+  }
+
+  latestScans(): Observable<{ short: KiteSignalResult | null; long: KiteSignalResult | null }> {
+    return this.http.get<{ short: KiteSignalResult | null; long: KiteSignalResult | null }>(
+      `${currentKiteApiBase()}/signals/latest`,
+      { headers: this.deskHeaders() },
+    );
   }
 
   scannerData(): Observable<unknown> {

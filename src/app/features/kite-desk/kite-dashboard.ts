@@ -79,6 +79,7 @@ export class KiteDashboard implements OnDestroy {
 
   constructor() {
     this.loadProfile();
+    this.loadSavedScans();
     effect(() => {
       const scanAll = this.scanAllNse();
       const maxStocks = scanAll ? 3080 : 100;
@@ -94,6 +95,9 @@ export class KiteDashboard implements OnDestroy {
   }
 
   selectTab(tab: KiteDeskTab): void {
+    if (tab === 'signals' && !this.scanResult().short && !this.scanResult().long) {
+      this.loadSavedScans();
+    }
     if (tab === 'final') {
       this.publishCrossovers();
     }
@@ -201,6 +205,19 @@ export class KiteDashboard implements OnDestroy {
     if (err?.status === 401) {
       void this.router.navigate(['/kite/login']);
     }
+  }
+
+  private loadSavedScans(): void {
+    this.kite.latestScans().subscribe({
+      next: saved => {
+        this.scanResult.update(current => ({
+          short: current.short ?? saved.short,
+          long: current.long ?? saved.long,
+        }));
+        this.publishCrossovers();
+      },
+      error: () => undefined,
+    });
   }
 
   private publishCrossovers(): void {

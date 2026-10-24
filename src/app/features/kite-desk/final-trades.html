@@ -2,7 +2,7 @@
   <div class="algo__head">
     <div>
       <h2 id="final-trades-title">Final list</h2>
-      <p class="algo__note">The model reads the moving-average crosses, the price and volume expansion names, and the RSI momentum and ATR names together. Run Live places a buy GTT only for an approved buy. A sell call is not sent as an order.</p>
+      <p class="algo__note">The backend sends the model only a name that passed the moving-average crossover, the price and volume expansion, and the RSI momentum and ATR screen. The model then reads filings, news, and lawsuits. Run Live places a Zerodha buy GTT only for an approved buy. A sell call is not sent as an order.</p>
     </div>
     <button type="button" class="jw-btn jw-btn--primary" (click)="runLive()" [disabled]="store.running() || store.loading() || store.finalLoading()">
       {{ store.running() ? 'Running...' : 'Run Live' }}

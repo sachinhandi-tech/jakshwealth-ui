@@ -41,12 +41,14 @@ function scan(signals: KiteSignal[], mode: KiteSignalResult['scan_mode'] = 'cros
 describe('KiteDashboard signals', () => {
   let fixture: ComponentFixture<KiteDashboard>;
   let jobs: Subject<KiteSignalJob>;
+  let savedScans: { short: KiteSignalResult | null; long: KiteSignalResult | null };
   let nextResult: KiteSignalResult;
   let pollStarted: Promise<void>;
   let markPollStarted: () => void;
 
   beforeEach(async () => {
     jobs = new Subject<KiteSignalJob>();
+    savedScans = { short: null, long: null };
     pollStarted = new Promise(resolve => {
       markPollStarted = resolve;
     });
@@ -59,6 +61,7 @@ describe('KiteDashboard signals', () => {
         markPollStarted();
         return jobs.asObservable();
       },
+      latestScans: () => of(savedScans),
     };
     await TestBed.configureTestingModule({
       imports: [KiteDashboard],
@@ -96,6 +99,15 @@ describe('KiteDashboard signals', () => {
     jobs.next({ job_id: 'job-1', status: 'done', result: nextResult, error: null });
     fixture.detectChanges();
   }
+
+  it('restores the saved moving-average list', () => {
+    savedScans.short = scan([
+      row({ rank: 1, ticker: 'SAVED', company: 'Saved Ltd' }),
+    ]);
+    fixture.componentInstance['loadSavedScans']();
+    openSignals();
+    expect(tickers()).toEqual(['SAVED']);
+  });
 
   it('clears the previous short-term table and sorts every column', async () => {
     const previous = scan([
