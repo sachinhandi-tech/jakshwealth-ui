@@ -128,6 +128,7 @@ export interface AlgoSetupResult {
   accepted: number;
   setups: AlgoSetupRow[];
   sell_calls?: AlgoSetupRow[];
+  vetoes?: AlgoSetupRow[];
   universe_note?: string;
   working?: boolean;
   paused?: boolean;
