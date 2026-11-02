@@ -159,7 +159,7 @@ describe('final list tab', () => {
     expect(fixture.nativeElement.textContent).toContain('Start from zero');
     expect(fixture.nativeElement.textContent).toContain('Price and volume');
     expect(fixture.nativeElement.textContent).toContain('Reading NSE and BSE equities.');
-    expect(fixture.nativeElement.textContent).toContain('No name has been approved for a trade yet.');
+    expect(fixture.nativeElement.textContent).toContain('No approved name in this list yet.');
     expect(fixture.nativeElement.textContent).toContain('Equity');
     expect(fixture.nativeElement.textContent).toContain('large, mid, and small cap');
     expect(fixture.nativeElement.textContent).toContain('Scan universe');

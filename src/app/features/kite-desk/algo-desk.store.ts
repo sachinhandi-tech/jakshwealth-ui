@@ -364,7 +364,13 @@ export class AlgoDeskStore implements OnDestroy {
     this.scheduleFinal(working);
     if (buys.length === 0) {
       const stoodAside = (result.setups ?? []).find(row => row.ai_reason);
-      this.finalNote.set(result.universe_note || stoodAside?.ai_reason || 'No name has been approved for a trade yet.');
+      const activityNote = [...(result.activity ?? [])].reverse().find(line => line.text)?.text;
+      this.finalNote.set(
+        result.universe_note
+        || activityNote
+        || stoodAside?.ai_reason
+        || 'No name has been approved for a trade yet.',
+      );
       return;
     }
     this.finalNote.set('');
