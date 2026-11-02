@@ -115,7 +115,26 @@ describe('final list tab', () => {
               setups: [],
               sell_calls: [],
               working: false,
+              caps: ['large', 'mid', 'small'],
               activity: [{ text: 'Reading NSE and BSE equities.', state: 'done' }],
+            }),
+            stopScan: () => of({
+              scanned: 0,
+              accepted: 0,
+              setups: [],
+              sell_calls: [],
+              working: false,
+              paused: true,
+              activity: [{ text: 'Scan stopped.', state: 'done' }],
+            }),
+            restartScan: () => of({
+              scanned: 0,
+              accepted: 0,
+              setups: [],
+              sell_calls: [],
+              working: true,
+              caps: ['large'],
+              activity: [{ text: 'Starting again from the first NSE share (large).', state: 'active' }],
             }),
             openTicks: () => new FakeSocket() as unknown as WebSocket,
           },
@@ -143,6 +162,10 @@ describe('final list tab', () => {
     expect(fixture.nativeElement.textContent).toContain('No name has been approved for a trade yet.');
     expect(fixture.nativeElement.textContent).toContain('Equity');
     expect(fixture.nativeElement.textContent).toContain('large, mid, and small cap');
+    expect(fixture.nativeElement.textContent).toContain('Scan universe');
+    expect(fixture.nativeElement.textContent).toContain('Large cap (Nifty 100)');
+    expect(fixture.nativeElement.textContent).toContain('Mid cap (Nifty Midcap 150)');
+    expect(fixture.nativeElement.textContent).toContain('Small cap (Nifty Smallcap 250)');
     expect(fixture.nativeElement.textContent).not.toContain('Commodity');
     expect(fixture.nativeElement.textContent).not.toContain('Stock futures');
     expect(fixture.nativeElement.textContent).not.toContain('Stock options');

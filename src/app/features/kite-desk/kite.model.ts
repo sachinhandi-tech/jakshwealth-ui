@@ -121,6 +121,8 @@ export interface FinalActivity {
   state?: string;
 }
 
+export type CapSegment = 'large' | 'mid' | 'small';
+
 export interface AlgoSetupResult {
   scanned: number;
   accepted: number;
@@ -129,6 +131,8 @@ export interface AlgoSetupResult {
   universe_note?: string;
   working?: boolean;
   paused?: boolean;
+  finished?: boolean;
+  caps?: CapSegment[];
   progress?: { done: number; total: number; label: string; action?: string; remaining_percent?: number } | null;
   activity?: FinalActivity[];
 }

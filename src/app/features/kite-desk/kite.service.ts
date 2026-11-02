@@ -128,8 +128,8 @@ export class KiteService {
     });
   }
 
-  restartScan(): Observable<AlgoSetupResult> {
-    return this.http.post<AlgoSetupResult>(`${currentKiteApiBase()}/algo/scan/restart`, {}, {
+  restartScan(caps: Array<'large' | 'mid' | 'small'> = ['large', 'mid', 'small']): Observable<AlgoSetupResult> {
+    return this.http.post<AlgoSetupResult>(`${currentKiteApiBase()}/algo/scan/restart`, { caps }, {
       headers: this.deskHeaders(),
     });
   }

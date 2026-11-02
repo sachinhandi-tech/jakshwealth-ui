@@ -2,10 +2,10 @@
   <div class="algo__head">
     <div>
       <h2 id="final-trades-title">Final list</h2>
-      <p class="algo__note">NSE large, mid, and small cap shares. A name reaches this page only after every screen below has passed.</p>
+      <p class="algo__note">{{ store.capNote() }} shares. A name reaches this page only after every screen below has passed.</p>
     </div>
     <div class="algo__actions">
-      <button type="button" class="jw-btn" (click)="toggleScan()" [disabled]="store.scanBusy()">
+      <button type="button" class="jw-btn" (click)="toggleScan()" [disabled]="store.scanBusy() || (!store.finalWorking() && store.selectedCaps().length === 0)">
         {{ store.finalWorking() && !store.finalPaused() ? 'Stop scan' : 'Start from zero' }}
       </button>
       <button type="button" class="jw-btn jw-btn--primary" (click)="runLive()" [disabled]="store.running() || store.loading() || store.finalLoading()">
@@ -13,6 +13,24 @@
       </button>
     </div>
   </div>
+
+  <fieldset class="algo__caps" [disabled]="store.finalWorking() && !store.finalPaused()">
+    <legend class="algo__caps-legend">Scan universe</legend>
+    <p class="algo__note algo__note--caps">Choose large, mid, and/or small cap, then start from zero.</p>
+    <div class="algo__caps-list" role="group" aria-label="Market cap lists">
+      @for (cap of caps; track cap.id) {
+        <label class="algo__cap">
+          <input
+            type="checkbox"
+            [checked]="store.capSelected(cap.id)"
+            (change)="toggleCap(cap.id)"
+            [disabled]="store.finalWorking() && !store.finalPaused()"
+          />
+          <span>{{ cap.label }}</span>
+        </label>
+      }
+    </div>
+  </fieldset>
 
   <ol class="algo__steps">
     <li>

@@ -5,11 +5,14 @@ import { BreakoutSetup, readStocks, scanBreakouts } from './algo-scanner';
 import {
   AlgoSetupResult,
   AlgoSetupRow,
+  CapSegment,
   FinalActivity,
   GttOrderRequest,
   GttOrderResult,
 } from './kite.model';
 import { KiteService } from './kite.service';
+
+const ALL_CAPS: CapSegment[] = ['large', 'mid', 'small'];
 
 export interface GttViewRow {
   rank: number;
@@ -77,10 +80,13 @@ export class AlgoDeskStore implements OnDestroy {
   readonly finalPaused = signal(false);
   readonly scanBusy = signal(false);
   readonly scanProgress = signal<{ done: number; total: number; label: string; action: string; remainingPercent: number } | null>(null);
+  readonly selectedCaps = signal<CapSegment[]>([...ALL_CAPS]);
   readonly crossoverSignals = signal<{ symbol: string; company_name: string; crossover_type: string }[]>([]);
   readonly livePrices = signal<ReadonlyMap<number, number>>(new Map());
   readonly snapshotPrices = signal<ReadonlyMap<string, number>>(new Map());
   private readonly gttResults = signal<ReadonlyMap<string, GttOrderResult>>(new Map());
+
+  readonly capNote = computed(() => capNote(this.selectedCaps()));
 
   readonly gttRows = computed(() => {
     const results = this.gttResults();
@@ -156,6 +162,22 @@ export class AlgoDeskStore implements OnDestroy {
     }
   }
 
+  toggleCap(cap: CapSegment): void {
+    const current = this.selectedCaps();
+    if (current.includes(cap)) {
+      if (current.length === 1) {
+        return;
+      }
+      this.selectedCaps.set(current.filter(item => item !== cap));
+      return;
+    }
+    this.selectedCaps.set(ALL_CAPS.filter(item => item === cap || current.includes(item)));
+  }
+
+  capSelected(cap: CapSegment): boolean {
+    return this.selectedCaps().includes(cap);
+  }
+
   async toggleScan(): Promise<void> {
     if (this.scanBusy()) {
       return;
@@ -164,7 +186,9 @@ export class AlgoDeskStore implements OnDestroy {
     this.scanBusy.set(true);
     this.finalError.set(null);
     try {
-      const result = await firstValueFrom(stopping ? this.kite.stopScan() : this.kite.restartScan());
+      const result = await firstValueFrom(
+        stopping ? this.kite.stopScan() : this.kite.restartScan(this.selectedCaps()),
+      );
       this.applyFinal(result);
     } catch (err) {
       if (!isGatewayWait(err)) {
@@ -179,7 +203,7 @@ export class AlgoDeskStore implements OnDestroy {
     if (!quiet) {
       this.finalError.set(null);
       if (this.finalActivity().length === 0) {
-        this.finalActivity.set([{ text: 'Opening the NSE large, mid, and small cap read.', state: 'active' }]);
+        this.finalActivity.set([{ text: `Opening the ${this.capNote()} read.`, state: 'active' }]);
         this.finalWorking.set(true);
       }
     }
@@ -331,7 +355,11 @@ export class AlgoDeskStore implements OnDestroy {
       remainingPercent: remaining,
     });
     this.finalPaused.set(result.paused === true);
-    const working = result.paused !== true && (result.working === true || (result.working == null && !!result.universe_note));
+    if (Array.isArray(result.caps) && result.caps.length > 0) {
+      this.selectedCaps.set(ALL_CAPS.filter(item => result.caps!.includes(item)));
+    }
+    const working = result.paused !== true && result.finished !== true
+      && (result.working === true || (result.working == null && !!result.universe_note));
     this.finalWorking.set(working);
     this.scheduleFinal(working);
     if (buys.length === 0) {
@@ -509,6 +537,28 @@ export class AlgoDeskStore implements OnDestroy {
     socket.onclose = null;
     socket.close();
   }
+}
+
+function capNote(caps: CapSegment[]): string {
+  const labels = ALL_CAPS.filter(item => caps.includes(item)).map(item => {
+    if (item === 'large') {
+      return 'large cap';
+    }
+    if (item === 'mid') {
+      return 'mid cap';
+    }
+    return 'small cap';
+  });
+  if (labels.length === 0 || labels.length === ALL_CAPS.length) {
+    return 'NSE large, mid, and small cap';
+  }
+  if (labels.length === 1) {
+    return `NSE ${labels[0]}`;
+  }
+  if (labels.length === 2) {
+    return `NSE ${labels[0]} and ${labels[1]}`;
+  }
+  return `NSE ${labels.slice(0, -1).join(', ')}, and ${labels[labels.length - 1]}`;
 }
 
 function toFinal(row: AlgoSetupRow, call: string): FinalTrade {
