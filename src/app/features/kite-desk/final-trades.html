@@ -17,7 +17,8 @@
   <fieldset class="algo__caps" [disabled]="store.finalWorking() && !store.finalPaused()">
     <legend class="algo__caps-legend">Scan universe</legend>
     <p class="algo__note algo__note--caps">
-      Tick only the lists you want (for example Small cap alone). Stop the current scan first if needed, then click Start from zero.
+      Tick only the lists you want (for example Large cap alone). Stop the current scan first if needed, then click Start from zero.
+      The next Start from zero uses these ticks only — polls will not put Mid or Small back on.
       Active universe: <strong>{{ store.capNote() }}</strong>.
     </p>
     <div class="algo__caps-list" role="group" aria-label="Market cap lists">

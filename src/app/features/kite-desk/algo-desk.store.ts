@@ -58,6 +58,8 @@ export class AlgoDeskStore implements OnDestroy {
   private loaded = false;
   private stopped = false;
   private fillCancelled = false;
+  /** After the first server snapshot, polls must not overwrite the user's checkboxes. */
+  private capsHydrated = false;
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -105,10 +107,7 @@ export class AlgoDeskStore implements OnDestroy {
     this.stopped = true;
     this.stopFill();
     this.closeTicks();
-    if (this.universeTimer !== null) {
-      clearTimeout(this.universeTimer);
-      this.universeTimer = null;
-    }
+    this.clearUniverseTimer();
   }
 
   setCrossoverSignals(rows: { symbol: string; company_name: string; crossover_type: string }[]): void {
@@ -185,11 +184,14 @@ export class AlgoDeskStore implements OnDestroy {
     const stopping = this.finalWorking() && !this.finalPaused();
     this.scanBusy.set(true);
     this.finalError.set(null);
+    // Freeze the checkboxes the user just set; cancel a poll that could put mid/small back.
+    this.clearUniverseTimer();
+    const caps = [...this.selectedCaps()];
     try {
       const result = await firstValueFrom(
-        stopping ? this.kite.stopScan() : this.kite.restartScan(this.selectedCaps()),
+        stopping ? this.kite.stopScan() : this.kite.restartScan(caps),
       );
-      this.applyFinal(result);
+      this.applyFinal(result, { syncCaps: true });
     } catch (err) {
       if (!isGatewayWait(err)) {
         this.finalError.set(readError(err));
@@ -331,7 +333,7 @@ export class AlgoDeskStore implements OnDestroy {
       : readError(err));
   }
 
-  private applyFinal(result: AlgoSetupResult): void {
+  private applyFinal(result: AlgoSetupResult, options?: { syncCaps?: boolean }): void {
     const buys = (result.setups ?? [])
       .filter(row => row.gtt_tradable === true && row.ai_decision === 'buy')
       .map(row => toFinal(row, 'buy'));
@@ -343,7 +345,8 @@ export class AlgoDeskStore implements OnDestroy {
     this.finalByBook.set(groupBooks(buys));
     this.sellByBook.set(groupBooks(sells));
     this.finalActivity.set(result.activity ?? []);
-    const progress = result.progress && result.progress.total > 0 ? result.progress : null;
+    const finished = result.finished === true;
+    const progress = !finished && result.progress && result.progress.total > 0 ? result.progress : null;
     const remaining = progress == null
       ? 0
       : progress.remaining_percent ?? Math.round(Math.max(progress.total - progress.done, 0) * 100 / progress.total);
@@ -355,10 +358,15 @@ export class AlgoDeskStore implements OnDestroy {
       remainingPercent: remaining,
     });
     this.finalPaused.set(result.paused === true);
+    // Polling used to overwrite Large-only with the server's previous Large+Mid selection
+    // right before Start from zero — then the restart quietly scanned mid again.
     if (Array.isArray(result.caps) && result.caps.length > 0) {
-      this.selectedCaps.set(ALL_CAPS.filter(item => result.caps!.includes(item)));
+      if (options?.syncCaps || !this.capsHydrated) {
+        this.selectedCaps.set(ALL_CAPS.filter(item => result.caps!.includes(item)));
+        this.capsHydrated = true;
+      }
     }
-    const working = result.paused !== true && result.finished !== true
+    const working = result.paused !== true && !finished
       && (result.working === true || (result.working == null && !!result.universe_note));
     this.finalWorking.set(working);
     this.scheduleFinal(working);
@@ -377,9 +385,17 @@ export class AlgoDeskStore implements OnDestroy {
     this.finalNote.set('');
   }
 
+  private clearUniverseTimer(): void {
+    if (this.universeTimer !== null) {
+      clearTimeout(this.universeTimer);
+      this.universeTimer = null;
+    }
+  }
+
   private scheduleFinal(working: boolean): void {
     if (!working) {
       this.universePolls = 0;
+      this.clearUniverseTimer();
       return;
     }
     if (this.universePolls >= 450 || this.universeTimer !== null) {
