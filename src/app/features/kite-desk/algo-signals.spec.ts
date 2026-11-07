@@ -157,7 +157,7 @@ describe('final list tab', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Run Live');
     expect(fixture.nativeElement.textContent).toContain('Start from zero');
-    expect(fixture.nativeElement.textContent).toContain('Fundamentals');
+    expect(fixture.nativeElement.textContent).toContain('20-day average');
     expect(fixture.nativeElement.textContent).toContain('Reading NSE and BSE equities.');
     expect(fixture.nativeElement.textContent).toContain('No approved name in this list yet.');
     expect(fixture.nativeElement.textContent).toContain('Equity');

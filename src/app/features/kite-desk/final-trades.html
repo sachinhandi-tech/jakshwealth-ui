@@ -40,26 +40,26 @@
     <li>
       <span class="algo__step-label">1</span>
       <div>
-        <h3>Fundamentals · points 1–27</h3>
-        <p>Business strength, promoters, governance, and financial strength. One red ends the study. Points 25–27 (margin, growth quality, self-sustainable growth) must be green. Governance is a veto.</p>
+        <h3>Moving average</h3>
+        <p>The 20-day average has crossed above the 50-day average. A longer bullish cross counts too.</p>
       </div>
     </li>
     <li>
       <span class="algo__step-label">2</span>
       <div>
-        <h3>Valuation</h3>
-        <p>Judged against peers and sentiment. A price that already discounts the next few years of growth is dropped, not parked.</p>
+        <h3>Price and volume</h3>
+        <p>Price and volume are expanding.</p>
       </div>
     </li>
     <li>
       <span class="algo__step-label">3</span>
       <div>
-        <h3>Technicals · points 28–30</h3>
-        <p>Only after the business and the price clear. 8–12 month price action, relative strength versus the index, and support within 20% of the price. A red here is watchlist only, not a buy.</p>
+        <h3>Momentum</h3>
+        <p>RSI and ATR show momentum, without a blow-off trap.</p>
       </div>
     </li>
   </ol>
-  <p class="algo__note algo__note--after">The model may buy only when every gate above passes. Run Live places one Zerodha buy GTT for each approved buy. A share is sized to one lakh rupees.</p>
+  <p class="algo__note algo__note--after">A name is listed only when all three screens pass. The model then scores the 30-point framework. Run Live places one Zerodha buy GTT for each approved buy. A share is sized to one lakh rupees.</p>
 
   @if (store.gttError(); as message) {
     <p class="desk__alert" role="alert">{{ message }}</p>
