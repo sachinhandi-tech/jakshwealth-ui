@@ -28,7 +28,20 @@ export class FinalTrades {
   }
 
   scanningHere(): boolean {
-    return this.store.finalWorking() && !this.store.finalPaused() && this.store.scanMode() === this.mode();
+    const view = this.store.scanView(this.mode());
+    return view.working && !view.paused;
+  }
+
+  capNote(): string {
+    return this.store.capNoteFor(this.mode());
+  }
+
+  selectedCaps(): CapSegment[] {
+    return this.store.capsFor(this.mode());
+  }
+
+  capOn(cap: CapSegment): boolean {
+    return this.store.capSelected(cap, this.mode());
   }
 
   runLive(): Promise<void> {
@@ -40,6 +53,6 @@ export class FinalTrades {
   }
 
   toggleCap(cap: CapSegment): void {
-    this.store.toggleCap(cap);
+    this.store.toggleCap(cap, this.mode());
   }
 }

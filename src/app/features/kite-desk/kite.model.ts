@@ -138,6 +138,7 @@ export interface AlgoSetupResult {
   mode?: 'screens' | 'wealth30';
   progress?: { done: number; total: number; label: string; action?: string; remaining_percent?: number } | null;
   activity?: FinalActivity[];
+  runs?: { screens?: AlgoSetupResult; wealth30?: AlgoSetupResult };
 }
 
 export interface GttOrderResult {

@@ -144,13 +144,13 @@ describe('final list tab', () => {
     const fixture = TestBed.createComponent(KiteDashboard);
     fixture.detectChanges();
     const labels = [...fixture.nativeElement.querySelectorAll('.desk__tab')].map(item => item.textContent?.trim());
-    expect(labels).toContain('Final list');
+    expect(labels).toContain('TechnicalScan');
     expect(labels).toContain('PaulScan');
     expect(labels).not.toContain('Market');
     expect(labels).not.toContain('ma-crossover');
     expect(labels).not.toContain('price-volume-expansion');
     const finalButton = [...fixture.nativeElement.querySelectorAll('button')].find(item =>
-      item.textContent?.includes('Final list'),
+      item.textContent?.includes('TechnicalScan'),
     ) as HTMLButtonElement;
     finalButton.click();
     fixture.detectChanges();

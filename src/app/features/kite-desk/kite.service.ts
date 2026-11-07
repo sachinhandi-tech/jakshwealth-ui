@@ -122,8 +122,8 @@ export class KiteService {
     });
   }
 
-  stopScan(): Observable<AlgoSetupResult> {
-    return this.http.post<AlgoSetupResult>(`${currentKiteApiBase()}/algo/scan/stop`, {}, {
+  stopScan(mode: 'screens' | 'wealth30' = 'screens'): Observable<AlgoSetupResult> {
+    return this.http.post<AlgoSetupResult>(`${currentKiteApiBase()}/algo/scan/stop`, { mode }, {
       headers: this.deskHeaders(),
     });
   }

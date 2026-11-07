@@ -48,6 +48,22 @@ export interface FinalTrade {
   segment: string;
 }
 
+export type ScanKind = 'screens' | 'wealth30';
+
+export interface ScanView {
+  working: boolean;
+  paused: boolean;
+  finished: boolean;
+  progress: { done: number; total: number; label: string; action: string; remainingPercent: number } | null;
+  activity: FinalActivity[];
+  passed: { symbol: string; company: string; status: string; reason: string }[];
+  trades: FinalTrade[];
+  sells: FinalTrade[];
+  byBook: Record<string, FinalTrade[]>;
+  sellByBook: Record<string, FinalTrade[]>;
+  note: string;
+}
+
 @Injectable()
 export class AlgoDeskStore implements OnDestroy {
   private readonly kite = inject(KiteService);
@@ -82,7 +98,13 @@ export class AlgoDeskStore implements OnDestroy {
   readonly scanBusy = signal(false);
   readonly scanProgress = signal<{ done: number; total: number; label: string; action: string; remainingPercent: number } | null>(null);
   readonly selectedCaps = signal<CapSegment[]>([...ALL_CAPS]);
-  readonly scanMode = signal<'screens' | 'wealth30'>('screens');
+  readonly scanMode = signal<ScanKind>('screens');
+  private readonly capsByMode = signal<Record<ScanKind, CapSegment[]>>({
+    screens: [...ALL_CAPS],
+    wealth30: [...ALL_CAPS],
+  });
+  readonly screensView = signal<ScanView>(idleScan());
+  readonly paulView = signal<ScanView>(idleScan());
   readonly crossoverSignals = signal<{ symbol: string; company_name: string; crossover_type: string }[]>([]);
   readonly livePrices = signal<ReadonlyMap<number, number>>(new Map());
   readonly snapshotPrices = signal<ReadonlyMap<string, number>>(new Map());
@@ -122,17 +144,24 @@ export class AlgoDeskStore implements OnDestroy {
     this.scanSub = null;
   }
 
-  async runLive(mode: 'screens' | 'wealth30' = 'screens'): Promise<void> {
+  scanView(mode: ScanKind): ScanView {
+    return mode === 'wealth30' ? this.paulView() : this.screensView();
+  }
+
+  capsFor(mode: ScanKind): CapSegment[] {
+    return this.capsByMode()[mode];
+  }
+
+  capNoteFor(mode: ScanKind): string {
+    return capNote(this.capsFor(mode));
+  }
+
+  async runLive(mode: ScanKind = 'screens'): Promise<void> {
     if (this.running()) {
       return;
     }
     this.running.set(true);
     this.gttError.set(null);
-    if (this.scanMode() !== mode) {
-      this.gttError.set('Start this read before Run Live.');
-      this.running.set(false);
-      return;
-    }
     try {
       await this.reload();
       if (this.error()) {
@@ -143,9 +172,10 @@ export class AlgoDeskStore implements OnDestroy {
         this.gttError.set(this.finalError());
         return;
       }
-      const approved = this.finalTrades().filter(row => row.gttTradable && row.call === 'buy' && row.entry > 0);
+      const view = this.scanView(mode);
+      const approved = view.trades.filter(row => row.gttTradable && row.call === 'buy' && row.entry > 0);
       if (approved.length === 0) {
-        this.gttError.set(this.finalNote() || 'No approved stock to send.');
+        this.gttError.set(view.note || 'No approved stock to send.');
         return;
       }
       await new Promise<void>(resolve => this.refreshSnapshot(resolve));
@@ -166,35 +196,41 @@ export class AlgoDeskStore implements OnDestroy {
     }
   }
 
-  toggleCap(cap: CapSegment): void {
-    const current = this.selectedCaps();
+  toggleCap(cap: CapSegment, mode: ScanKind = 'screens'): void {
+    const current = this.capsFor(mode);
+    let next: CapSegment[];
     if (current.includes(cap)) {
       if (current.length === 1) {
         return;
       }
-      this.selectedCaps.set(current.filter(item => item !== cap));
-      return;
+      next = current.filter(item => item !== cap);
+    } else {
+      next = ALL_CAPS.filter(item => item === cap || current.includes(item));
     }
-    this.selectedCaps.set(ALL_CAPS.filter(item => item === cap || current.includes(item)));
+    this.capsByMode.update(existing => ({ ...existing, [mode]: next }));
+    if (mode === 'screens') {
+      this.selectedCaps.set(next);
+    }
   }
 
-  capSelected(cap: CapSegment): boolean {
-    return this.selectedCaps().includes(cap);
+  capSelected(cap: CapSegment, mode: ScanKind = 'screens'): boolean {
+    return this.capsFor(mode).includes(cap);
   }
 
-  async toggleScan(mode: 'screens' | 'wealth30' = 'screens'): Promise<void> {
+  async toggleScan(mode: ScanKind = 'screens'): Promise<void> {
     if (this.scanBusy()) {
       return;
     }
-    const stopping = this.scanMode() === mode && this.finalWorking() && !this.finalPaused();
+    const view = this.scanView(mode);
+    const stopping = view.working && !view.paused;
     this.scanBusy.set(true);
     this.finalError.set(null);
     // Freeze the checkboxes the user just set; cancel a poll that could put mid/small back.
     this.clearUniverseTimer();
-    const caps = [...this.selectedCaps()];
+    const caps = [...this.capsFor(mode)];
     try {
       const result = await firstValueFrom(
-        stopping ? this.kite.stopScan() : this.kite.restartScan(caps, mode),
+        stopping ? this.kite.stopScan(mode) : this.kite.restartScan(caps, mode),
       );
       this.applyFinal(result);
     } catch (err) {
@@ -216,8 +252,10 @@ export class AlgoDeskStore implements OnDestroy {
     } catch (err) {
       if (isGatewayWait(err)) {
         this.finalError.set(null);
+        const note: FinalActivity[] = [{ text: 'The desk is still reading. Checking again.', state: 'active' }];
+        this.screensView.update(current => ({ ...current, working: true, activity: note }));
         this.finalWorking.set(true);
-        this.finalActivity.set([{ text: 'The desk is still reading. Checking again.', state: 'active' }]);
+        this.finalActivity.set(note);
         this.scheduleFinal(true);
         return;
       }
@@ -335,54 +373,86 @@ export class AlgoDeskStore implements OnDestroy {
   }
 
   private applyFinal(result: AlgoSetupResult): void {
-    this.scanMode.set(result.mode === 'wealth30' ? 'wealth30' : 'screens');
+    if (result.runs?.screens || result.runs?.wealth30) {
+      if (result.runs.screens) {
+        this.writeView('screens', result.runs.screens);
+      }
+      if (result.runs.wealth30) {
+        this.writeView('wealth30', result.runs.wealth30);
+      }
+    } else {
+      this.writeView(result.mode === 'wealth30' ? 'wealth30' : 'screens', result);
+    }
+    const working = this.screensView().working || this.paulView().working;
+    this.scheduleFinal(working);
+  }
+
+  private writeView(mode: ScanKind, result: AlgoSetupResult): void {
     const buys = (result.setups ?? [])
       .filter(row => row.gtt_tradable === true && row.ai_decision === 'buy')
       .map(row => toFinal(row, 'buy'));
     const sells = (result.sell_calls ?? [])
       .filter(row => row.ai_decision === 'sell')
       .map(row => toFinal(row, 'sell'));
-    this.finalTrades.set(buys);
-    this.sellCalls.set(sells);
-    this.finalByBook.set(groupBooks(buys));
-    this.sellByBook.set(groupBooks(sells));
-    this.finalActivity.set(result.activity ?? []);
-    this.passedNames.set((result.passed ?? []).map(row => ({
-      symbol: row.symbol,
-      company: row.company_name || '',
-      status: passedStatus(row.status),
-      reason: row.reason || '',
-    })));
     const finished = result.finished === true;
     const progress = !finished && result.progress && result.progress.total > 0 ? result.progress : null;
     const remaining = progress == null
       ? 0
       : progress.remaining_percent ?? Math.round(Math.max(progress.total - progress.done, 0) * 100 / progress.total);
-    this.scanProgress.set(progress == null ? null : {
-      done: progress.done,
-      total: progress.total,
-      label: progress.label,
-      action: progress.action || 'scanned',
-      remainingPercent: remaining,
-    });
-    this.finalPaused.set(result.paused === true);
-    const working = result.paused !== true && !finished
+    const paused = result.paused === true;
+    const working = paused !== true && !finished
       && (result.working === true || (result.working == null && !!result.universe_note));
-    this.finalWorking.set(working);
-    this.scheduleFinal(working);
+    const passed = (result.passed ?? []).map(row => ({
+      symbol: row.symbol,
+      company: row.company_name || '',
+      status: passedStatus(row.status),
+      reason: row.reason || '',
+    }));
+    let note = '';
     if (buys.length === 0) {
       const veto = (result.vetoes ?? []).find(row => row.ai_reason)
         || (result.setups ?? []).find(row => row.ai_reason);
       const activityNote = [...(result.activity ?? [])].reverse().find(line => line.text)?.text;
-      this.finalNote.set(
-        result.universe_note
+      note = result.universe_note
         || activityNote
         || (veto?.symbol && veto.ai_reason ? `${veto.symbol}: ${veto.ai_reason}` : veto?.ai_reason)
-        || 'No name has been approved for a trade yet.',
-      );
+        || 'No name has been approved for a trade yet.';
+    }
+    const view: ScanView = {
+      working,
+      paused,
+      finished,
+      progress: progress == null ? null : {
+        done: progress.done,
+        total: progress.total,
+        label: progress.label,
+        action: progress.action || 'scanned',
+        remainingPercent: remaining,
+      },
+      activity: result.activity ?? [],
+      passed,
+      trades: buys,
+      sells,
+      byBook: groupBooks(buys),
+      sellByBook: groupBooks(sells),
+      note,
+    };
+    if (mode === 'wealth30') {
+      this.paulView.set(view);
       return;
     }
-    this.finalNote.set('');
+    this.screensView.set(view);
+    this.scanMode.set('screens');
+    this.finalTrades.set(buys);
+    this.sellCalls.set(sells);
+    this.finalByBook.set(view.byBook);
+    this.sellByBook.set(view.sellByBook);
+    this.finalActivity.set(view.activity);
+    this.passedNames.set(passed);
+    this.scanProgress.set(view.progress);
+    this.finalPaused.set(paused);
+    this.finalWorking.set(working);
+    this.finalNote.set(note);
   }
 
   private clearUniverseTimer(): void {
@@ -393,7 +463,8 @@ export class AlgoDeskStore implements OnDestroy {
   }
 
   private scheduleFinal(working: boolean): void {
-    if (!working) {
+    const keep = working || this.screensView().working || this.paulView().working;
+    if (!keep) {
       this.universePolls = 0;
       this.clearUniverseTimer();
       return;
@@ -616,6 +687,22 @@ function toFinal(row: AlgoSetupRow, call: string): FinalTrade {
     exchange: row.exchange || 'NSE',
     gttTradable: row.gtt_tradable === true,
     segment: row.segment || 'equity',
+  };
+}
+
+function idleScan(): ScanView {
+  return {
+    working: false,
+    paused: false,
+    finished: false,
+    progress: null,
+    activity: [],
+    passed: [],
+    trades: [],
+    sells: [],
+    byBook: emptyBooks(),
+    sellByBook: emptyBooks(),
+    note: '',
   };
 }
 
