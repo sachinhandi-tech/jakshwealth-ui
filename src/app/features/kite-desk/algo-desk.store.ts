@@ -75,13 +75,14 @@ export class AlgoDeskStore implements OnDestroy {
   readonly finalLoading = signal(false);
   readonly finalError = signal<string | null>(null);
   readonly finalNote = signal('');
-  readonly passedNames = signal<{ symbol: string; company: string; status: string }[]>([]);
+  readonly passedNames = signal<{ symbol: string; company: string; status: string; reason: string }[]>([]);
   readonly finalActivity = signal<FinalActivity[]>([]);
   readonly finalWorking = signal(false);
   readonly finalPaused = signal(false);
   readonly scanBusy = signal(false);
   readonly scanProgress = signal<{ done: number; total: number; label: string; action: string; remainingPercent: number } | null>(null);
   readonly selectedCaps = signal<CapSegment[]>([...ALL_CAPS]);
+  readonly scanMode = signal<'screens' | 'wealth30'>('screens');
   readonly crossoverSignals = signal<{ symbol: string; company_name: string; crossover_type: string }[]>([]);
   readonly livePrices = signal<ReadonlyMap<number, number>>(new Map());
   readonly snapshotPrices = signal<ReadonlyMap<string, number>>(new Map());
@@ -121,12 +122,17 @@ export class AlgoDeskStore implements OnDestroy {
     this.scanSub = null;
   }
 
-  async runLive(): Promise<void> {
+  async runLive(mode: 'screens' | 'wealth30' = 'screens'): Promise<void> {
     if (this.running()) {
       return;
     }
     this.running.set(true);
     this.gttError.set(null);
+    if (this.scanMode() !== mode) {
+      this.gttError.set('Start this read before Run Live.');
+      this.running.set(false);
+      return;
+    }
     try {
       await this.reload();
       if (this.error()) {
@@ -176,11 +182,11 @@ export class AlgoDeskStore implements OnDestroy {
     return this.selectedCaps().includes(cap);
   }
 
-  async toggleScan(): Promise<void> {
+  async toggleScan(mode: 'screens' | 'wealth30' = 'screens'): Promise<void> {
     if (this.scanBusy()) {
       return;
     }
-    const stopping = this.finalWorking() && !this.finalPaused();
+    const stopping = this.scanMode() === mode && this.finalWorking() && !this.finalPaused();
     this.scanBusy.set(true);
     this.finalError.set(null);
     // Freeze the checkboxes the user just set; cancel a poll that could put mid/small back.
@@ -188,7 +194,7 @@ export class AlgoDeskStore implements OnDestroy {
     const caps = [...this.selectedCaps()];
     try {
       const result = await firstValueFrom(
-        stopping ? this.kite.stopScan() : this.kite.restartScan(caps),
+        stopping ? this.kite.stopScan() : this.kite.restartScan(caps, mode),
       );
       this.applyFinal(result);
     } catch (err) {
@@ -329,6 +335,7 @@ export class AlgoDeskStore implements OnDestroy {
   }
 
   private applyFinal(result: AlgoSetupResult): void {
+    this.scanMode.set(result.mode === 'wealth30' ? 'wealth30' : 'screens');
     const buys = (result.setups ?? [])
       .filter(row => row.gtt_tradable === true && row.ai_decision === 'buy')
       .map(row => toFinal(row, 'buy'));
@@ -344,6 +351,7 @@ export class AlgoDeskStore implements OnDestroy {
       symbol: row.symbol,
       company: row.company_name || '',
       status: passedStatus(row.status),
+      reason: row.reason || '',
     })));
     const finished = result.finished === true;
     const progress = !finished && result.progress && result.progress.total > 0 ? result.progress : null;

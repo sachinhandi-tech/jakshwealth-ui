@@ -1,5 +1,5 @@
 import { DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 
 import { AlgoDeskStore } from './algo-desk.store';
 import { CapSegment } from './kite.model';
@@ -13,6 +13,7 @@ import { CapSegment } from './kite.model';
 })
 export class FinalTrades {
   readonly store = inject(AlgoDeskStore);
+  readonly mode = input<'screens' | 'wealth30'>('screens');
   readonly grids = [
     { id: 'equity', title: 'Equity' },
   ];
@@ -26,12 +27,16 @@ export class FinalTrades {
     void this.store.refreshFinal();
   }
 
+  scanningHere(): boolean {
+    return this.store.finalWorking() && !this.store.finalPaused() && this.store.scanMode() === this.mode();
+  }
+
   runLive(): Promise<void> {
-    return this.store.runLive();
+    return this.store.runLive(this.mode());
   }
 
   toggleScan(): Promise<void> {
-    return this.store.toggleScan();
+    return this.store.toggleScan(this.mode());
   }
 
   toggleCap(cap: CapSegment): void {

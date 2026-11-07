@@ -128,8 +128,11 @@ export class KiteService {
     });
   }
 
-  restartScan(caps: Array<'large' | 'mid' | 'small'> = ['large', 'mid', 'small']): Observable<AlgoSetupResult> {
-    return this.http.post<AlgoSetupResult>(`${currentKiteApiBase()}/algo/scan/restart`, { caps }, {
+  restartScan(
+    caps: Array<'large' | 'mid' | 'small'> = ['large', 'mid', 'small'],
+    mode: 'screens' | 'wealth30' = 'screens',
+  ): Observable<AlgoSetupResult> {
+    return this.http.post<AlgoSetupResult>(`${currentKiteApiBase()}/algo/scan/restart`, { caps, mode }, {
       headers: this.deskHeaders(),
     });
   }

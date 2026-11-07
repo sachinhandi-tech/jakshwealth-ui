@@ -39,6 +39,20 @@
   font-size: 0.8125rem;
 }
 
+.final-passed__list {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.algo__passed-reason {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--jw-text-muted);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
 .algo__summary strong {
   color: var(--jw-text);
   font-variant-numeric: tabular-nums;

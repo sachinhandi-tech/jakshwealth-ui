@@ -145,6 +145,7 @@ describe('final list tab', () => {
     fixture.detectChanges();
     const labels = [...fixture.nativeElement.querySelectorAll('.desk__tab')].map(item => item.textContent?.trim());
     expect(labels).toContain('Final list');
+    expect(labels).toContain('PaulScan');
     expect(labels).not.toContain('Market');
     expect(labels).not.toContain('ma-crossover');
     expect(labels).not.toContain('price-volume-expansion');

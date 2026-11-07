@@ -1,12 +1,18 @@
 <section class="jw-glass-card desk__panel algo" aria-labelledby="final-trades-title">
   <div class="algo__head">
     <div>
-      <h2 id="final-trades-title">Final list</h2>
-      <p class="algo__note">{{ store.capNote() }} shares. A buy is allowed only after the 30-point framework clears. One red on points 1–27 drops the name.</p>
+      <h2 id="final-trades-title">{{ mode() === 'wealth30' ? 'PaulScan' : 'Final list' }}</h2>
+      <p class="algo__note">
+        @if (mode() === 'wealth30') {
+          {{ store.capNote() }} shares. Start from zero scores every name on the 129 Wealth Fund 30 points. One red on points 1–27 drops the name.
+        } @else {
+          {{ store.capNote() }} shares. A buy is allowed only after the 30-point framework clears. One red on points 1–27 drops the name.
+        }
+      </p>
     </div>
     <div class="algo__actions">
-      <button type="button" class="jw-btn" (click)="toggleScan()" [disabled]="store.scanBusy() || (!store.finalWorking() && store.selectedCaps().length === 0)">
-        {{ store.finalWorking() && !store.finalPaused() ? 'Stop scan' : 'Start from zero' }}
+      <button type="button" class="jw-btn" (click)="toggleScan()" [disabled]="store.scanBusy() || (!scanningHere() && store.selectedCaps().length === 0)">
+        {{ scanningHere() ? 'Stop scan' : 'Start from zero' }}
       </button>
       <button type="button" class="jw-btn jw-btn--primary" (click)="runLive()" [disabled]="store.running() || store.loading() || store.finalLoading()">
         {{ store.running() ? 'Running...' : 'Run Live' }}
@@ -14,7 +20,7 @@
     </div>
   </div>
 
-  <fieldset class="algo__caps" [disabled]="store.finalWorking() && !store.finalPaused()">
+  <fieldset class="algo__caps" [disabled]="scanningHere()">
     <legend class="algo__caps-legend">Scan universe</legend>
     <p class="algo__note algo__note--caps">
       Tick only the lists you want (for example Large cap alone). Stop the current scan first if needed, then click Start from zero.
@@ -28,7 +34,7 @@
             type="checkbox"
             [checked]="store.capSelected(cap.id)"
             (change)="toggleCap(cap.id)"
-            [disabled]="store.finalWorking() && !store.finalPaused()"
+            [disabled]="scanningHere()"
           />
           <span>{{ cap.label }}</span>
         </label>
@@ -36,30 +42,67 @@
     </div>
   </fieldset>
 
-  <ol class="algo__steps">
-    <li>
-      <span class="algo__step-label">1</span>
-      <div>
-        <h3>Moving average</h3>
-        <p>The 20-day average has crossed above the 50-day average. A longer bullish cross counts too.</p>
-      </div>
-    </li>
-    <li>
-      <span class="algo__step-label">2</span>
-      <div>
-        <h3>Price and volume</h3>
-        <p>Price and volume are expanding.</p>
-      </div>
-    </li>
-    <li>
-      <span class="algo__step-label">3</span>
-      <div>
-        <h3>Momentum</h3>
-        <p>RSI and ATR show momentum, without a blow-off trap.</p>
-      </div>
-    </li>
-  </ol>
-  <p class="algo__note algo__note--after">A name is listed only when all three screens pass. The model then scores the 30-point framework. Run Live places one Zerodha buy GTT for each approved buy. A share is sized to one lakh rupees.</p>
+  @if (mode() === 'wealth30') {
+    <ol class="algo__steps">
+      <li>
+        <span class="algo__step-label">1</span>
+        <div>
+          <h3>Fundamentals · points 1–27</h3>
+          <p>Business strength, promoters, governance, and financial strength. One red ends the study. Points 25–27 must be green. Governance is a veto.</p>
+        </div>
+      </li>
+      <li>
+        <span class="algo__step-label">2</span>
+        <div>
+          <h3>Valuation</h3>
+          <p>Judged against peers and sentiment. A price that already discounts the next few years of growth is dropped, not parked.</p>
+        </div>
+      </li>
+      <li>
+        <span class="algo__step-label">3</span>
+        <div>
+          <h3>Technicals · points 28–30</h3>
+          <p>8–12 month price action, relative strength versus the index, and support within 20% of the price. A red here is watchlist only.</p>
+        </div>
+      </li>
+    </ol>
+    <p class="algo__note algo__note--after">Start from zero reads only the caps you tick and scores each name on these 30 points. Run Live places one Zerodha buy GTT for each approved buy. A share is sized to one lakh rupees.</p>
+  } @else {
+    <ol class="algo__steps">
+      <li>
+        <span class="algo__step-label">1</span>
+        <div>
+          <h3>Moving average</h3>
+          <p>The 20-day average has crossed above the 50-day average. A longer bullish cross counts too.</p>
+        </div>
+      </li>
+      <li>
+        <span class="algo__step-label">2</span>
+        <div>
+          <h3>Price and volume</h3>
+          <p>Price and volume are expanding.</p>
+        </div>
+      </li>
+      <li>
+        <span class="algo__step-label">3</span>
+        <div>
+          <h3>Momentum</h3>
+          <p>RSI and ATR show momentum, without a blow-off trap.</p>
+        </div>
+      </li>
+    </ol>
+    <p class="algo__note algo__note--after">A name is listed only when all three screens pass. The model then scores the 30-point framework. Run Live places one Zerodha buy GTT for each approved buy. A share is sized to one lakh rupees.</p>
+  }
+
+  @if (store.scanMode() !== mode()) {
+    <p class="desk__status algo__empty">
+      @if (mode() === 'wealth30') {
+        Start from zero to score the ticked caps on the 30-point framework.
+      } @else {
+        Start from zero to run the price screens on the ticked caps.
+      }
+    </p>
+  } @else {
 
   @if (store.gttError(); as message) {
     <p class="desk__alert" role="alert">{{ message }}</p>
@@ -94,9 +137,15 @@
 
   @if (store.passedNames().length > 0) {
     <div class="final-passed">
-      <h3 class="algo__table-title">Passed the screens</h3>
-      <p class="algo__note">These names are listed before the model scores the 30-point framework.</p>
-      <ul class="algo__summary">
+      <h3 class="algo__table-title">{{ mode() === 'wealth30' ? '30-point read' : 'Passed the screens' }}</h3>
+      <p class="algo__note">
+        @if (mode() === 'wealth30') {
+          Every name in the ticked caps is listed here while the model scores the 30 points.
+        } @else {
+          These names are listed before the model scores the 30-point framework.
+        }
+      </p>
+      <ul class="algo__summary final-passed__list">
         @for (row of store.passedNames(); track row.symbol) {
           <li>
             <strong>{{ row.symbol }}</strong>
@@ -104,6 +153,9 @@
               {{ row.company }}
             }
             — {{ row.status }}
+            @if (row.reason) {
+              <span class="algo__passed-reason">{{ row.reason }}</span>
+            }
           </li>
         }
       </ul>
@@ -163,4 +215,5 @@
       </div>
     }
   </div>
+  }
 </section>

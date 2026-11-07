@@ -129,12 +129,13 @@ export interface AlgoSetupResult {
   setups: AlgoSetupRow[];
   sell_calls?: AlgoSetupRow[];
   vetoes?: AlgoSetupRow[];
-  passed?: { symbol: string; company_name?: string; last_close?: number | null; status?: string }[];
+  passed?: { symbol: string; company_name?: string; last_close?: number | null; status?: string; reason?: string }[];
   universe_note?: string;
   working?: boolean;
   paused?: boolean;
   finished?: boolean;
   caps?: CapSegment[];
+  mode?: 'screens' | 'wealth30';
   progress?: { done: number; total: number; label: string; action?: string; remaining_percent?: number } | null;
   activity?: FinalActivity[];
 }
@@ -163,7 +164,7 @@ export interface GttOrderResponse {
   orders: GttOrderResult[];
 }
 
-export type KiteDeskTab = 'user' | 'market' | 'signals' | 'algo' | 'final' | 'gtt';
+export type KiteDeskTab = 'user' | 'market' | 'signals' | 'algo' | 'final' | 'paul' | 'gtt';
 
 export interface KiteDeskTabItem {
   id: KiteDeskTab;
