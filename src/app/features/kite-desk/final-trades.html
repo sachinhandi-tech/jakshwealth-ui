@@ -98,7 +98,13 @@
       <p class="algo__note">These names are listed before the model reads filings, news, and the 30-point framework.</p>
       <ul class="algo__summary">
         @for (row of store.passedNames(); track row.symbol) {
-          <li><strong>{{ row.symbol }}</strong> {{ row.company }} — {{ row.status }}</li>
+          <li>
+            <strong>{{ row.symbol }}</strong>
+            @if (row.company && row.company !== row.symbol) {
+              {{ row.company }}
+            }
+            — {{ row.status }}
+          </li>
         }
       </ul>
     </div>

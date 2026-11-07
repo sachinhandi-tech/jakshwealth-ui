@@ -58,8 +58,6 @@ export class AlgoDeskStore implements OnDestroy {
   private loaded = false;
   private stopped = false;
   private fillCancelled = false;
-  /** After the first server snapshot, polls must not overwrite the user's checkboxes. */
-  private capsHydrated = false;
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -192,7 +190,7 @@ export class AlgoDeskStore implements OnDestroy {
       const result = await firstValueFrom(
         stopping ? this.kite.stopScan() : this.kite.restartScan(caps),
       );
-      this.applyFinal(result, { syncCaps: true });
+      this.applyFinal(result);
     } catch (err) {
       if (!isGatewayWait(err)) {
         this.finalError.set(readError(err));
@@ -205,10 +203,6 @@ export class AlgoDeskStore implements OnDestroy {
   async refreshFinal(quiet = false): Promise<void> {
     if (!quiet) {
       this.finalError.set(null);
-      if (this.finalActivity().length === 0) {
-        this.finalActivity.set([{ text: `Opening the ${this.capNote()} read.`, state: 'active' }]);
-        this.finalWorking.set(true);
-      }
     }
     try {
       const result = await firstValueFrom(this.kite.algoSetups([], []));
@@ -334,7 +328,7 @@ export class AlgoDeskStore implements OnDestroy {
       : readError(err));
   }
 
-  private applyFinal(result: AlgoSetupResult, options?: { syncCaps?: boolean }): void {
+  private applyFinal(result: AlgoSetupResult): void {
     const buys = (result.setups ?? [])
       .filter(row => row.gtt_tradable === true && row.ai_decision === 'buy')
       .map(row => toFinal(row, 'buy'));
@@ -364,14 +358,6 @@ export class AlgoDeskStore implements OnDestroy {
       remainingPercent: remaining,
     });
     this.finalPaused.set(result.paused === true);
-    // Polling used to overwrite Large-only with the server's previous Large+Mid selection
-    // right before Start from zero — then the restart quietly scanned mid again.
-    if (Array.isArray(result.caps) && result.caps.length > 0) {
-      if (options?.syncCaps || !this.capsHydrated) {
-        this.selectedCaps.set(ALL_CAPS.filter(item => result.caps!.includes(item)));
-        this.capsHydrated = true;
-      }
-    }
     const working = result.paused !== true && !finished
       && (result.working === true || (result.working == null && !!result.universe_note));
     this.finalWorking.set(working);
