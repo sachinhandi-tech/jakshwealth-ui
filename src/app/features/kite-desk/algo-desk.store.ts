@@ -77,6 +77,7 @@ export class AlgoDeskStore implements OnDestroy {
   readonly finalLoading = signal(false);
   readonly finalError = signal<string | null>(null);
   readonly finalNote = signal('');
+  readonly passedNames = signal<{ symbol: string; company: string; status: string }[]>([]);
   readonly finalActivity = signal<FinalActivity[]>([]);
   readonly finalWorking = signal(false);
   readonly finalPaused = signal(false);
@@ -345,6 +346,11 @@ export class AlgoDeskStore implements OnDestroy {
     this.finalByBook.set(groupBooks(buys));
     this.sellByBook.set(groupBooks(sells));
     this.finalActivity.set(result.activity ?? []);
+    this.passedNames.set((result.passed ?? []).map(row => ({
+      symbol: row.symbol,
+      company: row.company_name || '',
+      status: passedStatus(row.status),
+    })));
     const finished = result.finished === true;
     const progress = !finished && result.progress && result.progress.total > 0 ? result.progress : null;
     const remaining = progress == null
@@ -560,6 +566,19 @@ export class AlgoDeskStore implements OnDestroy {
     socket.onclose = null;
     socket.close();
   }
+}
+
+function passedStatus(status: string | undefined): string {
+  if (status === 'buy') {
+    return 'Model approved a buy';
+  }
+  if (status === 'stand_aside') {
+    return 'Model stood aside';
+  }
+  if (status === 'unavailable') {
+    return 'Model did not answer';
+  }
+  return 'Waiting for the model';
 }
 
 function capNote(caps: CapSegment[]): string {

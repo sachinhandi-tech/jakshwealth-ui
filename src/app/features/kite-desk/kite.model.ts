@@ -129,6 +129,7 @@ export interface AlgoSetupResult {
   setups: AlgoSetupRow[];
   sell_calls?: AlgoSetupRow[];
   vetoes?: AlgoSetupRow[];
+  passed?: { symbol: string; company_name?: string; last_close?: number | null; status?: string }[];
   universe_note?: string;
   working?: boolean;
   paused?: boolean;
